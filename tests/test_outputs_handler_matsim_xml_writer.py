@@ -68,8 +68,8 @@ def test_network_from_test_osm_data_produces_valid_matsim_network_xml_file(full_
 
 def test_network_with_extra_attribs_produces_valid_matsim_network_xml_file(tmpdir, network_dtd):
     network = Network('epsg:27700')
-    network.add_node('0', attribs={'id': '0', 'x': 1, 'y': 2, 'lat': 1, 'lon': 2})
-    network.add_node('1', attribs={'id': '1', 'x': 2, 'y': 2, 'lat': 2, 'lon': 2})
+    network.add_node('0', x_y=(1, 2))
+    network.add_node('1', x_y=(2, 2))
     network.add_link('0', '0', '1', attribs={'id': '0', 'from': '0', 'to': '1', 'length': 1, 'freespeed': 1,
                                              'capacity': 20, 'permlanes': 1, 'oneway': '1', 'modes': ['car'],
                                              'extra_Special_attrib': 12})

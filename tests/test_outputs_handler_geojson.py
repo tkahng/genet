@@ -6,8 +6,8 @@ from tests.fixtures import assert_semantically_equal
 
 def test_save_to_geojson(tmpdir):
     n = Network('epsg:27700')
-    n.add_node('0', attribs={'x': 528704.1425925883, 'y': 182068.78193707118})
-    n.add_node('1', attribs={'x': 528804.1425925883, 'y': 182168.78193707118})
+    n.add_node('0', x_y=(528704.1425925883, 182068.78193707118))
+    n.add_node('1', x_y=(528804.1425925883, 182168.78193707118))
     n.add_link('link_0', '0', '1', attribs={'length': 123, 'modes': ['car', 'walk']})
 
     correct_nodes = {

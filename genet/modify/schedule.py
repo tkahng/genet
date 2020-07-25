@@ -12,8 +12,8 @@ def find_routes_for_schedule(network, snapping_distance):
     }
     schedule_modes = network.schedule.unique_modes()
     for mode_group_name, network_modes in routing_mode_map.items():
-        logging.info(f'Routing for subgraph: {mode_group_name}')
         if schedule_modes & network_modes:
+            logging.info(f'Routing for subgraph: {mode_group_name}')
             # extract modal subgraph
             modal_subgraph = network.modal_subgraph(network_modes)
             if modal_subgraph.edges():

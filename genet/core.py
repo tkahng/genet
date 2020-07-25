@@ -27,7 +27,8 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 class Network:
     def __init__(self, epsg):
         self.epsg = epsg
-        self.transformer = Transformer.from_crs(epsg, 'epsg:4326')
+        self.transformer_to_lat_lon = Transformer.from_crs(epsg, 'epsg:4326')
+        self.transformer_to_net_proj = Transformer.from_crs('epsg:4326', epsg)
         self.graph = nx.MultiDiGraph(name='Network graph', crs={'init': self.epsg})
         self.schedule = Schedule(epsg)
         self.change_log = change_log.ChangeLog()
@@ -138,9 +139,11 @@ class Network:
     def initiate_crs_transformer(self, epsg):
         self.epsg = epsg
         if epsg != 'epsg:4326':
-            self.transformer = Transformer.from_crs(epsg, 'epsg:4326')
+            self.transformer_to_lat_lon = Transformer.from_crs(epsg, 'epsg:4326')
+            self.transformer_to_net_proj = Transformer.from_crs('epsg:4326', epsg)
         else:
-            self.transformer = None
+            self.transformer_to_lat_lon = None
+            self.transformer_to_net_proj = None
 
     def node_attribute_summary(self, data=False):
         """
@@ -236,19 +239,38 @@ class Network:
             df.index = df.index.set_names([index_name])
         return df
 
-    def add_node(self, node: Union[str, int], attribs: dict = None, silent: bool = False):
+    def add_node(self, node: Union[str, int], x_y=None, lat_lon=None, attribs: dict = None, silent: bool = False):
         """
         Adds a node.
-        :param node:
-        :param attribs: should include spatial information x,y in epsg cosistent with the network or lat lon in
-        epsg:4326
+        :param node: node id
+        :param x_y: (x,y) tuple spatial information x, y in epsg consistent with the network
+        :param lat_lon: (lat,lon) tuple spatial information lat lon in epsg:4326
+        :param attribs: any other attribs
         :param silent: whether to mute stdout logging messages, useful for big batches
         :return:
         """
-        if attribs is not None:
-            self.graph.add_node(node, **attribs)
+        if x_y:
+            x, y = x_y
+            if self.epsg != 'epsg:4326':
+                lat, lon = spatial.change_proj(x, y, self.transformer_to_lat_lon)
+            else:
+                lat, lon = x, y
+        elif lat_lon:
+            lat, lon = lat_lon
+            if self.epsg != 'epsg:4326':
+                x, y = spatial.change_proj(lat, lon, self.transformer_to_net_proj)
+            else:
+                x, y = lat, lon
         else:
-            self.graph.add_node(node)
+            raise NotImplementedError('To add a node you need to give spatial information x, y or lat, lon coordinates')
+        compulsory_attribs = {'id': node, 'x': x, 'y': y, 'lat': lat, 'lon': lon,
+                              's2_id': spatial.grab_index_s2(lat, lon)}
+        if attribs is None:
+            attribs = compulsory_attribs
+        else:
+            attribs = {**attribs, **compulsory_attribs}
+
+        self.graph.add_node(node, **attribs)
         self.change_log.add(object_type='node', object_id=node, object_attributes=attribs)
         if not silent:
             logging.info('Added Node with index `{}` and data={}'.format(node, attribs))
@@ -920,14 +942,7 @@ class Network:
             osm_file_path, config, num_processes)
         for node_id, attribs in nodes.items():
             x, y = spatial.change_proj(attribs['x'], attribs['y'], input_to_output_transformer)
-            self.add_node(str(node_id), {
-                'id': str(node_id),
-                'x': x,
-                'y': y,
-                'lat': attribs['x'],
-                'lon': attribs['y'],
-                's2_id': attribs['s2id']
-            }, silent=True)
+            self.add_node(str(node_id), x_y=(x,y), silent=True)
 
         for edge, attribs in edges:
             u, v = str(edge[0]), str(edge[1])
@@ -961,6 +976,7 @@ class Network:
                 return list(set(link_attribs['modes']) - {mode})
             else:
                 return link_attribs['modes']
+
         modal_subgraph = self.modal_subgraph(mode)
         # calculate how many connected subgraphs there are
         connected_components = network_validation.find_connected_subgraphs(modal_subgraph)
@@ -975,7 +991,7 @@ class Network:
 
     def read_matsim_network(self, path):
         self.graph, self.link_id_mapping, duplicated_nodes, duplicated_links = \
-            matsim_reader.read_network(path, self.transformer)
+            matsim_reader.read_network(path, self.transformer_to_lat_lon)
         self.graph.graph['name'] = 'Network graph'
         self.graph.graph['crs'] = {'init': self.epsg}
 

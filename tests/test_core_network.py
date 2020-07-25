@@ -22,20 +22,8 @@ pt2matsim_schedule_file = os.path.abspath(
 @pytest.fixture()
 def network1():
     n1 = Network('epsg:27700')
-    n1.add_node('101982',
-                {'id': '101982',
-                 'x': '528704.1425925883',
-                 'y': '182068.78193707118',
-                 'lon': -0.14625948709424305,
-                 'lat': 51.52287873323954,
-                 's2_id': 5221390329378179879})
-    n1.add_node('101986',
-                {'id': '101986',
-                 'x': '528835.203274008',
-                 'y': '182006.27331298392',
-                 'lon': -0.14439428709377497,
-                 'lat': 51.52228713323965,
-                 's2_id': 5221390328605860387})
+    n1.add_node('101982', x_y=(528704.1425925883, 182068.78193707118))
+    n1.add_node('101986', x_y=(528835.203274008, 182006.27331298392))
     n1.add_link('0', '101982', '101986',
                 attribs={'id': '0',
                          'from': '101982',
@@ -66,20 +54,8 @@ def network1():
 @pytest.fixture()
 def network2():
     n2 = Network('epsg:4326')
-    n2.add_node('101982',
-                {'id': '101982',
-                 'x': -0.14625948709424305,
-                 'y': 51.52287873323954,
-                 'lon': -0.14625948709424305,
-                 'lat': 51.52287873323954,
-                 's2_id': 5221390329378179879})
-    n2.add_node('101990',
-                {'id': '101990',
-                 'x': -0.14770188709624754,
-                 'y': 51.5205729332399,
-                 'lon': -0.14770188709624754,
-                 'lat': 51.5205729332399,
-                 's2_id': 5221390304444511271})
+    n2.add_node('101982', x_y=(51.52287873323954, -0.14625948709424305,))
+    n2.add_node('101990', x_y=(51.5205729332399, -0.14770188709624754))
     n2.add_link('0', '101982', '101990',
                 attribs={'id': '0',
                          'from': '101982',
@@ -140,17 +116,13 @@ def test_reproject_delegates_reprojection_to_schedules_own_method(network1, rout
 
 def test_adding_the_same_networks():
     n_left = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_right.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                           'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_right.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                           'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_right.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_right.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_right.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_left.add(n_right)
@@ -164,17 +136,13 @@ def test_adding_the_same_networks():
 
 def test_adding_the_same_networks_but_with_differing_projections():
     n_left = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_right.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                           'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_right.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                           'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_right.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_right.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_right.add_link('1', '1', '2', attribs={'modes': ['walk']})
     n_right.reproject('epsg:4326')
 
@@ -189,17 +157,13 @@ def test_adding_the_same_networks_but_with_differing_projections():
 
 def test_adding_networks_with_clashing_node_ids():
     n_left = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_right.add_node('10', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                            'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_right.add_node('20', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                            'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_right.add_node('10', x_y=(528704.1425925883, 182068.78193707118))
+    n_right.add_node('20', x_y=(528835.203274008, 182006.27331298392))
     n_right.add_link('1', '10', '20', attribs={'modes': ['walk']})
 
     n_left.add(n_right)
@@ -213,17 +177,13 @@ def test_adding_networks_with_clashing_node_ids():
 
 def test_adding_networks_with_clashing_link_ids():
     n_left = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_right.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                           'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_right.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                           'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_right.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_right.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_right.add_link('10', '1', '2', attribs={'modes': ['walk']})
 
     n_left.add(n_right)
@@ -237,17 +197,13 @@ def test_adding_networks_with_clashing_link_ids():
 
 def test_adding_networks_with_clashing_multiindices():
     n_left = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', 0, attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', 0, attribs={'modes': ['walk', 'bike']})
 
     n_left.add(n_right)
@@ -263,45 +219,40 @@ def test_adding_networks_with_clashing_multiindices():
 
 def test_adding_disjoint_networks_with_unique_ids():
     n_left = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_right.add_node('10', {'id': '1', 'x': 1, 'y': 1,
-                            'lon': 1, 'lat': 1, 's2_id': 1})
-    n_right.add_node('20', {'id': '2', 'x': 1, 'y': 1,
-                            'lon': 1, 'lat': 1, 's2_id': 2})
+    n_right.add_node('10', x_y=(528701, 182070))
+    n_right.add_node('20', x_y=(528837, 182008))
     n_right.add_link('100', '10', '20', attribs={'modes': ['walk']})
 
     n_left.add(n_right)
-    assert_semantically_equal(dict(n_left.nodes()), {'10': {'id': '1', 'x': 1, 'y': 1, 'lon': 1, 'lat': 1, 's2_id': 1},
-                                                     '20': {'id': '2', 'x': 1, 'y': 1, 'lon': 1, 'lat': 1, 's2_id': 2},
-                                                     '1': {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                                                           'lon': -0.14625948709424305, 'lat': 51.52287873323954,
-                                                           's2_id': 5221390329378179879},
-                                                     '2': {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                                                           'lon': -0.14439428709377497, 'lat': 51.52228713323965,
-                                                           's2_id': 5221390328605860387}})
+    assert_semantically_equal(dict(n_left.nodes()),
+                              {'10': {'id': '10', 'x': 528701, 'y': 182070, 'lat': 51.52289039507891,
+                                      'lon': -0.1463043142064796, 's2_id': 5221390329378786147},
+                               '20': {'id': '20', 'x': 528837, 'y': 182008, 'lat': 51.52230224101315,
+                                      'lon': -0.14436777335634526, 's2_id': 5221390328605636423},
+                               '1': {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
+                                     'lon': -0.14625948709424305, 'lat': 51.52287873323954,
+                                     's2_id': 5221390329378179879},
+                               '2': {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
+                                     'lon': -0.14439428709377497, 'lat': 51.52228713323965,
+                                     's2_id': 5221390328605860387}})
     assert_semantically_equal(dict(n_left.links()), {'100': {'modes': ['walk'], 'from': '10', 'to': '20', 'id': '100'},
                                                      '1': {'modes': ['walk'], 'from': '1', 'to': '2', 'id': '1'}})
 
 
 def test_adding_disjoint_networks_with_clashing_ids():
     n_left = Network('epsg:27700')
-    n_left.add_node('1', {'id': '1', 'x': 528704.1425925883, 'y': 182068.78193707118,
-                          'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879})
-    n_left.add_node('2', {'id': '2', 'x': 528835.203274008, 'y': 182006.27331298392,
-                          'lon': -0.14439428709377497, 'lat': 51.52228713323965, 's2_id': 5221390328605860387})
+    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
     n_left.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_right.add_node('1', {'id': '1', 'x': 1, 'y': 1,
-                           'lon': 1, 'lat': 1, 's2_id': 1})
-    n_right.add_node('2', {'id': '2', 'x': 1, 'y': 1,
-                           'lon': 1, 'lat': 1, 's2_id': 2})
+    n_right.add_node('1', x_y=(1, 1))
+    n_right.add_node('2', x_y=(1, 2))
     n_right.add_link('1', '1', '2', attribs={'modes': ['walk']})
 
     n_left.add(n_right)
@@ -344,8 +295,8 @@ def test_plot_schedule_delegates_to_util_plot_plot_non_routed_schedule_graph(moc
 
 def test_node_attribute_data_under_key_returns_correct_pd_series_with_nested_keys():
     n = Network('epsg:27700')
-    n.add_node(1, {'a': {'b': 1}})
-    n.add_node(2, {'a': {'b': 4}})
+    n.add_node(1, x_y=(1, 1), attribs={'a': {'b': 1}})
+    n.add_node(2, x_y=(2, 2), attribs={'a': {'b': 4}})
 
     output_series = n.node_attribute_data_under_key(key={'a': 'b'})
     assert_series_equal(output_series, pd.Series({1: 1, 2: 4}))
@@ -353,8 +304,8 @@ def test_node_attribute_data_under_key_returns_correct_pd_series_with_nested_key
 
 def test_node_attribute_data_under_key_returns_correct_pd_series_with_flat_keys():
     n = Network('epsg:27700')
-    n.add_node(1, {'b': 1})
-    n.add_node(2, {'b': 4})
+    n.add_node(1, x_y=(1, 1), attribs={'b': 1})
+    n.add_node(2, x_y=(2, 2), attribs={'b': 4})
 
     output_series = n.node_attribute_data_under_key(key='b')
     assert_series_equal(output_series, pd.Series({1: 1, 2: 4}))
@@ -363,8 +314,8 @@ def test_node_attribute_data_under_key_returns_correct_pd_series_with_flat_keys(
 def test_node_attribute_data_under_keys(network1):
     df = network1.node_attribute_data_under_keys(['x', 'y'])
 
-    df_to_compare = pd.DataFrame({'x': {'101982': '528704.1425925883', '101986': '528835.203274008'},
-                                  'y': {'101982': '182068.78193707118', '101986': '182006.27331298392'}})
+    df_to_compare = pd.DataFrame({'x': {'101982': 528704.1425925883, '101986': 528835.203274008},
+                                  'y': {'101982': 182068.78193707118, '101986': 182006.27331298392}})
 
     assert_frame_equal(df, df_to_compare)
 
@@ -375,7 +326,7 @@ def test_node_attribute_data_under_keys_with_named_index(network1):
 
 
 def test_node_attribute_data_under_keys_generates_key_for_nested_data(network1):
-    network1.add_node('1', {'key': {'nested_value': {'more_nested': 4}}})
+    network1.add_node('1', x_y=(1, 1), attribs={'key': {'nested_value': {'more_nested': 4}}})
     df = network1.node_attribute_data_under_keys([{'key': {'nested_value': 'more_nested'}}])
     assert isinstance(df, pd.DataFrame)
     assert 'key::nested_value::more_nested' in df.columns
@@ -433,16 +384,20 @@ def test_link_attribute_data_under_keys_generates_key_for_nested_data(network1):
 
 def test_add_node_adds_node_to_graph_with_attribs():
     n = Network('epsg:27700')
-    n.add_node(1, {'a': 1})
+    n.add_node(1, x_y=(1, 1), attribs={'a': 1})
     assert n.graph.has_node(1)
-    assert n.node(1) == {'a': 1}
+    assert_semantically_equal(n.node(1),
+                              {'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978,
+                               's2_id': 5205973754090381381})
 
 
-def test_add_node_adds_node_to_graph_without_attribs():
+def test_add_node_adds_node_to_graph_without_additional_attribs():
     n = Network('epsg:27700')
-    n.add_node(1)
-    assert n.node(1) == {}
+    n.add_node(1, x_y=(1, 1))
     assert n.graph.has_node(1)
+    assert_semantically_equal(n.node(1),
+                              {'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978,
+                               's2_id': 5205973754090381381})
 
 
 def test_add_edge_generates_a_link_id_and_delegated_to_add_link_id(mocker):
@@ -617,16 +572,15 @@ def test_reindex_node(network1):
     assert network1.link_id_mapping['0']['from'] == '007'
 
     correct_change_log_df = pd.DataFrame(
-        {'timestamp': {3: '2020-06-08 19:39:08', 4: '2020-06-08 19:39:08', 5: '2020-06-08 19:39:08'},
-         'change_event': {3: 'modify', 4: 'modify', 5: 'modify'}, 'object_type': {3: 'link', 4: 'node', 5: 'node'},
+        {'change_event': {3: 'modify', 4: 'modify', 5: 'modify'}, 'object_type': {3: 'link', 4: 'node', 5: 'node'},
          'old_id': {3: '0', 4: '101982', 5: '101982'}, 'new_id': {3: '0', 4: '007', 5: '101982'}, 'old_attributes': {
             3: "{'id': '0', 'from': '101982', 'to': '101986', 'freespeed': 4.166666666666667, 'capacity': 600.0, 'permlanes': 1.0, 'oneway': '1', 'modes': ['car'], 's2_from': 5221390329378179879, 's2_to': 5221390328605860387, 'length': 52.765151087870265, 'attributes': {'osm:way:access': {'name': 'osm:way:access', 'class': 'java.lang.String', 'text': 'permissive'}, 'osm:way:highway': {'name': 'osm:way:highway', 'class': 'java.lang.String', 'text': 'unclassified'}, 'osm:way:id': {'name': 'osm:way:id', 'class': 'java.lang.Long', 'text': '26997928'}, 'osm:way:name': {'name': 'osm:way:name', 'class': 'java.lang.String', 'text': 'Brunswick Place'}}}",
-            4: "{'id': '101982', 'x': '528704.1425925883', 'y': '182068.78193707118', 'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879}",
-            5: "{'id': '101982', 'x': '528704.1425925883', 'y': '182068.78193707118', 'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879}"},
+            4: "{'id': '101982', 'x': 528704.1425925883, 'y': 182068.78193707118, 'lat': 51.52287873323954, 'lon': -0.14625948709424305, 's2_id': 5221390329378179879}",
+            5: "{'id': '101982', 'x': 528704.1425925883, 'y': 182068.78193707118, 'lat': 51.52287873323954, 'lon': -0.14625948709424305, 's2_id': 5221390329378179879}"},
          'new_attributes': {
              3: "{'id': '0', 'from': '007', 'to': '101986', 'freespeed': 4.166666666666667, 'capacity': 600.0, 'permlanes': 1.0, 'oneway': '1', 'modes': ['car'], 's2_from': 5221390329378179879, 's2_to': 5221390328605860387, 'length': 52.765151087870265, 'attributes': {'osm:way:access': {'name': 'osm:way:access', 'class': 'java.lang.String', 'text': 'permissive'}, 'osm:way:highway': {'name': 'osm:way:highway', 'class': 'java.lang.String', 'text': 'unclassified'}, 'osm:way:id': {'name': 'osm:way:id', 'class': 'java.lang.Long', 'text': '26997928'}, 'osm:way:name': {'name': 'osm:way:name', 'class': 'java.lang.String', 'text': 'Brunswick Place'}}}",
-             4: "{'id': '007', 'x': '528704.1425925883', 'y': '182068.78193707118', 'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879}",
-             5: "{'id': '007', 'x': '528704.1425925883', 'y': '182068.78193707118', 'lon': -0.14625948709424305, 'lat': 51.52287873323954, 's2_id': 5221390329378179879}"},
+             4: "{'id': '007', 'x': 528704.1425925883, 'y': 182068.78193707118, 'lat': 51.52287873323954, 'lon': -0.14625948709424305, 's2_id': 5221390329378179879}",
+             5: "{'id': '007', 'x': 528704.1425925883, 'y': 182068.78193707118, 'lat': 51.52287873323954, 'lon': -0.14625948709424305, 's2_id': 5221390329378179879}"},
          'diff': {3: [('change', 'from', ('101982', '007'))],
                   4: [('change', 'id', ('101982', '007')), ('change', 'id', ('101982', '007'))],
                   5: [('change', 'id', ('101982', '007'))]}})
@@ -706,16 +660,25 @@ def test_reindex_link_when_link_id_already_exists(network1):
 
 def test_modify_node_adds_attributes_in_the_graph_and_change_is_recorded_by_change_log():
     n = Network('epsg:27700')
-    n.add_node(1, {'a': 1})
+    n.add_node(1, x_y=(1, 1), attribs={'a': 1})
     n.apply_attributes_to_node(1, {'b': 1})
 
-    assert n.node(1) == {'b': 1, 'a': 1}
+    assert 'b' in n.node(1)
+    assert n.node(1)['b'] == 1
+    assert 'a' in n.node(1)
+    assert n.node(1)['a'] == 1
 
     correct_change_log_df = pd.DataFrame(
-        {'timestamp': {0: '2020-05-28 13:49:53', 1: '2020-05-28 13:49:53'}, 'change_event': {0: 'add', 1: 'modify'},
+        {'timestamp': {0: '2020-07-25 21:12:12', 1: '2020-07-25 21:12:12'}, 'change_event': {0: 'add', 1: 'modify'},
          'object_type': {0: 'node', 1: 'node'}, 'old_id': {0: None, 1: 1}, 'new_id': {0: 1, 1: 1},
-         'old_attributes': {0: None, 1: "{'a': 1}"}, 'new_attributes': {0: "{'a': 1}", 1: "{'a': 1, 'b': 1}"},
-         'diff': {0: [('add', '', [('a', 1)]), ('add', 'id', 1)], 1: [('add', '', [('b', 1)])]}})
+         'old_attributes': {0: None,
+                            1: "{'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}"},
+         'new_attributes': {
+             0: "{'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}",
+             1: "{'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381, 'b': 1}"},
+         'diff': {0: [('add', '', [('a', 1), ('id', 1), ('x', 1), ('y', 1), ('lat', 49.76681685192715),
+                                   ('lon', -7.557147012910978), ('s2_id', 5205973754090381381)]), ('add', 'id', 1)],
+                  1: [('add', '', [('b', 1)])]}})
 
     cols_to_compare = ['change_event', 'object_type', 'old_id', 'new_id', 'old_attributes', 'new_attributes', 'diff']
     assert_frame_equal(n.change_log.log[cols_to_compare], correct_change_log_df[cols_to_compare], check_names=False,
@@ -724,16 +687,22 @@ def test_modify_node_adds_attributes_in_the_graph_and_change_is_recorded_by_chan
 
 def test_modify_node_overwrites_existing_attributes_in_the_graph_and_change_is_recorded_by_change_log():
     n = Network('epsg:27700')
-    n.add_node(1, {'a': 1})
+    n.add_node(1, x_y=(1, 1), attribs={'a': 1})
     n.apply_attributes_to_node(1, {'a': 4})
 
-    assert n.node(1) == {'a': 4}
+    assert 'a' in n.node(1)
+    assert n.node(1)['a'] == 4
 
     correct_change_log_df = pd.DataFrame(
-        {'timestamp': {0: '2020-05-28 13:49:53', 1: '2020-05-28 13:49:53'}, 'change_event': {0: 'add', 1: 'modify'},
-         'object_type': {0: 'node', 1: 'node'}, 'old_id': {0: None, 1: 1}, 'new_id': {0: 1, 1: 1},
-         'old_attributes': {0: None, 1: "{'a': 1}"}, 'new_attributes': {0: "{'a': 1}", 1: "{'a': 4}"},
-         'diff': {0: [('add', '', [('a', 1)]), ('add', 'id', 1)], 1: [('change', 'a', (1, 4))]}})
+        {'change_event': {0: 'add', 1: 'modify'}, 'object_type': {0: 'node', 1: 'node'}, 'old_id': {0: None, 1: 1},
+         'new_id': {0: 1, 1: 1}, 'old_attributes': {0: None,
+                                                    1: "{'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}"},
+         'new_attributes': {
+             0: "{'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}",
+             1: "{'a': 4, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}"},
+         'diff': {0: [('add', '', [('a', 1), ('id', 1), ('x', 1), ('y', 1), ('lat', 49.76681685192715),
+                                   ('lon', -7.557147012910978), ('s2_id', 5205973754090381381)]), ('add', 'id', 1)],
+                  1: [('change', 'a', (1, 4))]}})
 
     cols_to_compare = ['change_event', 'object_type', 'old_id', 'new_id', 'old_attributes', 'new_attributes', 'diff']
     assert_frame_equal(n.change_log.log[cols_to_compare], correct_change_log_df[cols_to_compare], check_dtype=False)
@@ -741,22 +710,34 @@ def test_modify_node_overwrites_existing_attributes_in_the_graph_and_change_is_r
 
 def test_modify_nodes_adds_and_changes_attributes_in_the_graph_and_change_is_recorded_by_change_log():
     n = Network('epsg:27700')
-    n.add_node(1, {'a': 1})
-    n.add_node(2, {'b': 1})
+    n.add_node(1, x_y=(1, 1), attribs={'a': 1})
+    n.add_node(2, x_y=(1, 1), attribs={'b': 1})
     n.apply_attributes_to_nodes({1: {'a': 4}, 2: {'a': 1}})
 
-    assert n.node(1) == {'a': 4}
-    assert n.node(2) == {'b': 1, 'a': 1}
+    assert_semantically_equal(n.node(1),
+                              {'a': 4, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978,
+                               's2_id': 5205973754090381381})
+    assert_semantically_equal(n.node(2),
+                              {'b': 1, 'id': 2, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978,
+                               's2_id': 5205973754090381381, 'a': 1})
 
     correct_change_log_df = pd.DataFrame(
-        {'timestamp': {0: '2020-06-01 15:07:51', 1: '2020-06-01 15:07:51', 2: '2020-06-01 15:07:51',
-                       3: '2020-06-01 15:07:51'}, 'change_event': {0: 'add', 1: 'add', 2: 'modify', 3: 'modify'},
+        {'timestamp': {0: '2020-07-25 21:16:15', 1: '2020-07-25 21:16:15', 2: '2020-07-25 21:16:15',
+                       3: '2020-07-25 21:16:15'}, 'change_event': {0: 'add', 1: 'add', 2: 'modify', 3: 'modify'},
          'object_type': {0: 'node', 1: 'node', 2: 'node', 3: 'node'}, 'old_id': {0: None, 1: None, 2: 1, 3: 2},
-         'new_id': {0: 1, 1: 2, 2: 1, 3: 2}, 'old_attributes': {0: None, 1: None, 2: "{'a': 1}", 3: "{'b': 1}"},
-         'new_attributes': {0: "{'a': 1}", 1: "{'b': 1}", 2: "{'a': 4}", 3: "{'b': 1, 'a': 1}"},
-         'diff': {0: [('add', '', [('a', 1)]), ('add', 'id', 1)], 1: [('add', '', [('b', 1)]), ('add', 'id', 2)],
-                  2: [('change', 'a', (1, 4))], 3: [('add', '', [('a', 1)])]}
-         })
+         'new_id': {0: 1, 1: 2, 2: 1, 3: 2}, 'old_attributes': {0: None, 1: None,
+                                                                2: "{'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}",
+                                                                3: "{'b': 1, 'id': 2, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}"},
+         'new_attributes': {
+             0: "{'a': 1, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}",
+             1: "{'b': 1, 'id': 2, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}",
+             2: "{'a': 4, 'id': 1, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381}",
+             3: "{'b': 1, 'id': 2, 'x': 1, 'y': 1, 'lat': 49.76681685192715, 'lon': -7.557147012910978, 's2_id': 5205973754090381381, 'a': 1}"},
+         'diff': {0: [('add', '', [('a', 1), ('id', 1), ('x', 1), ('y', 1), ('lat', 49.76681685192715),
+                                   ('lon', -7.557147012910978), ('s2_id', 5205973754090381381)]), ('add', 'id', 1)],
+                  1: [('add', '', [('b', 1), ('id', 2), ('x', 1), ('y', 1), ('lat', 49.76681685192715),
+                                   ('lon', -7.557147012910978), ('s2_id', 5205973754090381381)]), ('add', 'id', 2)],
+                  2: [('change', 'a', (1, 4))], 3: [('add', '', [('a', 1)])]}})
 
     cols_to_compare = ['change_event', 'object_type', 'old_id', 'new_id', 'old_attributes', 'new_attributes', 'diff']
     assert_frame_equal(n.change_log.log[cols_to_compare], correct_change_log_df[cols_to_compare], check_dtype=False)
@@ -768,12 +749,14 @@ def multiply_node_attribs(node_attribs):
 
 def test_apply_function_to_nodes():
     n = Network('epsg:27700')
-    n.add_node('0', attribs={'a': 2, 'c': 3})
-    n.add_node('1', attribs={'c': 100})
+    n.add_node('0', x_y=(1, 1), attribs={'a': 2, 'c': 3})
+    n.add_node('1', x_y=(1, 1), attribs={'c': 100})
     n.apply_function_to_nodes(function=multiply_node_attribs, location='new_computed_attrib')
     assert_semantically_equal(dict(n.nodes()),
-                              {'0': {'a': 2, 'c': 3, 'new_computed_attrib': 6},
-                               '1': {'c': 100}})
+                              {'0': {'a': 2, 'c': 3, 'id': '0', 'x': 1, 'y': 1, 'lat': 49.76681685192715,
+                                     'lon': -7.557147012910978, 's2_id': 5205973754090381381, 'new_computed_attrib': 6},
+                               '1': {'c': 100, 'id': '1', 'x': 1, 'y': 1, 'lat': 49.76681685192715,
+                                     'lon': -7.557147012910978, 's2_id': 5205973754090381381}})
 
 
 def test_apply_attributes_to_edge_without_filter_conditions():
@@ -1053,12 +1036,6 @@ def test_nodes_gives_iterator_of_node_id_and_attribs():
     assert list(n.nodes()) == [(1, {}), (2, {}), (3, {}), (4, {})]
 
 
-def test_node_gives_node_attribss():
-    n = Network('epsg:27700')
-    n.graph.add_node(1, **{'attrib': 1})
-    assert n.node(1) == {'attrib': 1}
-
-
 def test_edges_gives_iterator_of_edge_from_to_nodes_and_attribs():
     n = Network('epsg:27700')
     n.graph.add_edges_from([(1, 2), (2, 3), (3, 4)])
@@ -1168,7 +1145,7 @@ def test_read_matsim_network_delegates_to_matsim_reader_read_network(mocker):
     network = Network('epsg:27700')
     network.read_matsim_network(pt2matsim_network_test_file)
 
-    matsim_reader.read_network.assert_called_once_with(pt2matsim_network_test_file, network.transformer)
+    matsim_reader.read_network.assert_called_once_with(pt2matsim_network_test_file, network.transformer_to_lat_lon)
 
 
 def test_read_matsim_network_with_duplicated_node_ids_records_removal_in_changelog(mocker):
@@ -1230,7 +1207,7 @@ def test_read_matsim_schedule_runs_schedule_read_matsim_schedule_using_epsg_from
 
 def test_has_node_when_node_is_in_the_graph():
     n = Network('epsg:27700')
-    n.add_node('1')
+    n.add_node('1', x_y=(1, 1))
     assert n.has_node('1')
 
 
@@ -1241,25 +1218,25 @@ def test_has_node_when_node_is_not_in_the_graph():
 
 def test_has_nodes_when_nodes_in_the_graph():
     n = Network('epsg:27700')
-    n.add_node('1')
-    n.add_node('2')
-    n.add_node('3')
+    n.add_node('1', x_y=(1, 1))
+    n.add_node('2', x_y=(1, 1))
+    n.add_node('3', x_y=(1, 1))
     assert n.has_nodes(['1', '2'])
 
 
 def test_has_nodes_when_only_some_nodes_in_the_graph():
     n = Network('epsg:27700')
-    n.add_node('1')
-    n.add_node('2')
-    n.add_node('3')
+    n.add_node('1', x_y=(1, 1))
+    n.add_node('2', x_y=(1, 1))
+    n.add_node('3', x_y=(1, 1))
     assert not n.has_nodes(['1', '4'])
 
 
 def test_has_nodes_when_none_of_the_nodes_in_the_graph():
     n = Network('epsg:27700')
-    n.add_node('1')
-    n.add_node('2')
-    n.add_node('3')
+    n.add_node('1', x_y=(1, 1))
+    n.add_node('2', x_y=(1, 1))
+    n.add_node('3', x_y=(1, 1))
     assert not n.has_nodes(['10', '20'])
 
 
@@ -1367,9 +1344,9 @@ def test_calculate_route_distance_with_links_that_have_length_attrib():
 
 def test_calculate_route_distance_with_links_that_dont_have_length_attrib():
     n = Network('epsg:27700')
-    n.add_node(1, attribs={'s2_id': 12345})
-    n.add_node(3, attribs={'s2_id': 345435})
-    n.add_node(4, attribs={'s2_id': 568767})
+    n.add_node(1, x_y=(1, 1))
+    n.add_node(3, x_y=(1, 2))
+    n.add_node(4, x_y=(1, 3))
     n.add_link('1', 1, 3)
     n.add_link('2', 3, 4)
     assert round(n.route_distance(['1', '2']), 6) == 0.013918
@@ -1420,30 +1397,30 @@ def test_network_route_with_incorrect_modes_on_link():
 
 def test_generate_index_for_node_gives_next_integer_string_when_you_have_matsim_usual_integer_index():
     n = Network('epsg:27700')
-    n.add_node('1')
+    n.add_node('1', x_y=(1, 1))
     assert n.generate_index_for_node() == '2'
 
 
 def test_generate_index_for_node_gives_string_based_on_length_node_ids_when_you_have_mixed_index():
     n = Network('epsg:27700')
-    n.add_node('1')
-    n.add_node('1x')
+    n.add_node('1', x_y=(1, 1))
+    n.add_node('1x', x_y=(1, 1))
     assert n.generate_index_for_node() == '3'
 
 
 def test_generate_index_for_node_gives_string_based_on_length_node_ids_when_you_have_all_non_int_index():
     n = Network('epsg:27700')
-    n.add_node('1w')
-    n.add_node('1x')
+    n.add_node('1w', x_y=(1, 1))
+    n.add_node('1x', x_y=(1, 1))
     assert n.generate_index_for_node() == '3'
 
 
 def test_generate_index_for_node_gives_uuid4_as_last_resort(mocker):
     mocker.patch.object(uuid, 'uuid4')
     n = Network('epsg:27700')
-    n.add_node('1w')
-    n.add_node('1x')
-    n.add_node('4')
+    n.add_node('1w', x_y=(1, 1))
+    n.add_node('1x', x_y=(1, 1))
+    n.add_node('4', x_y=(1, 1))
     n.generate_index_for_node()
     uuid.uuid4.assert_called_once()
 
@@ -1560,7 +1537,8 @@ def test_generate_validation_report_with_pt2matsim_network(network_object_from_t
                         'number_of_connected_subgraphs': 2},
                 'walk': {'problem_nodes': {'dead_ends': ['21667818'], 'unreachable_node': ['25508485']},
                          'number_of_connected_subgraphs': 2},
-                'bike': {'problem_nodes': {'dead_ends': [], 'unreachable_node': []}, 'number_of_connected_subgraphs': 0}},
+                'bike': {'problem_nodes': {'dead_ends': [], 'unreachable_node': []},
+                         'number_of_connected_subgraphs': 0}},
             'links_over_1km_length': []},
         'schedule': {
             'schedule_level': {'is_valid_schedule': False, 'invalid_stages': ['not_has_valid_services'],
