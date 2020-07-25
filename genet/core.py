@@ -883,6 +883,7 @@ class Network:
 
         def links_over_1km_length(value):
             return value >= 1000
+
         report['graph']['links_over_1km_length'] = graph_operations.extract_links_on_edge_attributes(
             self,
             conditions={'length': links_over_1km_length}
@@ -944,15 +945,33 @@ class Network:
             for key, val in attribs.items():
                 if key not in link_attributes:
                     link_attributes['attributes']['osm:way:{}'.format(key)] = {
-                            'name': 'osm:way:{}'.format(key),
-                            'class': 'java.lang.String',
-                            'text': str(val),
-                        }
+                        'name': 'osm:way:{}'.format(key),
+                        'class': 'java.lang.String',
+                        'text': str(val),
+                    }
 
             self.add_edge(u, v, attribs=link_attributes, silent=True)
 
         logging.info('Deleting isolated nodes which have no edges.')
         self.remove_nodes(list(nx.isolates(self.graph)), silent=True)
+
+    def retain_n_connected_subgraphs(self, n, mode):
+        def remove_mode(link_attribs):
+            if link_attribs['id'] in diff_links:
+                return list(set(link_attribs['modes']) - {mode})
+            else:
+                return link_attribs['modes']
+        modal_subgraph = self.modal_subgraph(mode)
+        # calculate how many connected subgraphs there are
+        connected_components = network_validation.find_connected_subgraphs(modal_subgraph)
+        connected_components_nodes = []
+        for i in range(0, n):
+            connected_components_nodes += connected_components[i][0]
+        connected_subgraphs_to_extract = modal_subgraph.subgraph(connected_components_nodes).copy().edges.data('id')
+        diff_links = set([e[2] for e in modal_subgraph.edges.data('id')]) - set(
+            [e[2] for e in connected_subgraphs_to_extract])
+        logging.info('Cleaning for resulted in mode: {} being deleted from {} edges'.format(mode, len(diff_links)))
+        self.apply_function_to_links(function=remove_mode, location='modes', silent=True)
 
     def read_matsim_network(self, path):
         self.graph, self.link_id_mapping, duplicated_nodes, duplicated_links = \
@@ -999,6 +1018,7 @@ class Schedule:
     :param stops_mapping: {'stop_id' : [service_id, service_id_2, ...]} for extracting services given a stop_id
     :param epsg: 'epsg:12345', projection for the schedule (each stop has its own epsg)
     """
+
     def __init__(self, epsg, services: List[schedule_elements.Service] = None):
         self.epsg = epsg
         self.transformer = Transformer.from_crs(epsg, 'epsg:4326')
