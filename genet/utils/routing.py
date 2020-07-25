@@ -15,6 +15,8 @@ def snap_and_route(network_graph, schedule_element, snapping_distance):
     """
     problem_g, schedule_g = build_graph_for_maximum_stable_set_problem(network_graph, schedule_element,
                                                                        snapping_distance)
+    if problem_g is None:
+        return None
     solution = set_up_and_solve_model(problem_g)
     nx.set_node_attributes(schedule_g, solution)
     # generate route(s)
