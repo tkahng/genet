@@ -423,6 +423,13 @@ class Service:
         service_graph.mode = modes
         return service_graph
 
+    def unique_modes(self):
+        """
+        Returns list of unique modes
+        :return:
+        """
+        return self.build_graph().mode
+
     def is_strongly_connected(self):
         g = self.build_graph()
         if nx.number_strongly_connected_components(g) == 1:

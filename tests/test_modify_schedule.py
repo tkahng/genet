@@ -52,16 +52,33 @@ def network():
                                                 arrival_offsets=['00:00:00', '00:02:00'],
                                                 departure_offsets=['00:00:00', '00:03:00']
                                                 )
+                          ]),
+                              Service(id='service_rail',
+                                      routes=[
+                                          Route(id='service_rail_route_2',
+                                                route_short_name='',
+                                                mode='rail',
+                                                stops=[Stop(epsg='epsg:27700', id='stop_1', x=1, y=2.5),
+                                                       Stop(epsg='epsg:27700', id='stop_2', x=2, y=2.5)],
+                                                trips={'trip_1': '15:30:00'},
+                                                arrival_offsets=['00:00:00', '00:02:00'],
+                                                departure_offsets=['00:00:00', '00:03:00']
+                                                ),
+                                          Route(id='service_rail_route_2',
+                                                route_short_name='',
+                                                mode='rail',
+                                                stops=[Stop(epsg='epsg:27700', id='stop_2', x=2, y=2.5),
+                                                       Stop(epsg='epsg:27700', id='stop_3', x=5.5, y=2)],
+                                                trips={'trip_1': '16:30:00'},
+                                                arrival_offsets=['00:00:00', '00:02:00'],
+                                                departure_offsets=['00:00:00', '00:03:00']
+                                                )
                           ])])
     return n
 
 
-def test_find_routes_for_service(mocker, network):
-    mocker.patch.object(spatial, 'find_closest_nodes',
-                        side_effect=[['node_5', 'node_6'], ['node_7', 'node_8'], ['node_1', 'node_2']])
-    schedule.find_routes_for_service(network.graph, network.schedule['service_1'], 30)
-
-    n=0
+def assert_correct_routing_for_service_1(network):
+    n = 0
     assert network.schedule['service_1'].routes[n].stops[0].has_linkRefId
     assert network.schedule['service_1'].routes[n].stops[0].linkRefId == 'link_5'
     assert network.schedule['service_1'].routes[n].stops[1].has_linkRefId
@@ -73,7 +90,7 @@ def test_find_routes_for_service(mocker, network):
     else:
         raise AssertionError
 
-    n=1
+    n = 1
     assert network.schedule['service_1'].routes[n].stops[1].has_linkRefId
     assert network.schedule['service_1'].routes[n].stops[1].linkRefId == 'link_8'
     assert network.schedule['service_1'].routes[n].stops[0].has_linkRefId
@@ -84,6 +101,20 @@ def test_find_routes_for_service(mocker, network):
         assert network.schedule['service_1'].routes[n].route == ['link_7', 'link_8']
     else:
         raise AssertionError
+
+
+def test_find_routes_for_schedule(mocker, network):
+    mocker.patch.object(spatial, 'find_closest_nodes',
+                        side_effect=[['node_5', 'node_6'], ['node_7', 'node_8'], ['node_1', 'node_2']])
+    schedule.find_routes_for_schedule(network, 30)
+    assert_correct_routing_for_service_1(network)
+
+
+def test_find_routes_for_service(mocker, network):
+    mocker.patch.object(spatial, 'find_closest_nodes',
+                        side_effect=[['node_5', 'node_6'], ['node_7', 'node_8'], ['node_1', 'node_2']])
+    schedule.find_routes_for_service(network.graph, network.schedule['service_1'], 30)
+    assert_correct_routing_for_service_1(network)
 
 
 def test_find_route_for_route(mocker, network):

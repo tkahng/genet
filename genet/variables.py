@@ -9,23 +9,23 @@ NECESSARY_NETWORK_LINK_ATTRIBUTES = ['id', 'from', 'to', 'length', 'freespeed', 
 # e.g. {"subway,metro" : [1, 400, 401 ,402, 403, 405]}
 # https://developers.google.com/transit/gtfs/reference#routestxt
 EXTENDED_TYPE_DICT = {
-    "tram,streetcar,light rail": [0],
-    "subway,metro": [1],
+    "tram": [0],
+    "subway": [1],
     "rail": [2],
     "bus": [3],
     "ferry": [4],
     "cable car": [5],
-    "gondola,suspended cable car": [6],
+    "gondola": [6],
     "funicular": [7]
 }
 # Now extended, mapping to basic modes
 # https://developers.google.com/transit/gtfs/reference/extended-route-types
 EXTENDED_TYPE_DICT['rail'].extend(list(range(100, 118)))
 EXTENDED_TYPE_DICT['bus'].extend(list(range(200, 210)))
-EXTENDED_TYPE_DICT['subway,metro'].extend(list(range(400, 406)))
+EXTENDED_TYPE_DICT['subway'].extend(list(range(400, 406)))
 EXTENDED_TYPE_DICT['bus'].extend(list(range(700, 718)))
 EXTENDED_TYPE_DICT['bus'].append(800)
-EXTENDED_TYPE_DICT['tram,streetcar,light rail'].extend(list(range(900, 908)))
+EXTENDED_TYPE_DICT['tram'].extend(list(range(900, 908)))
 EXTENDED_TYPE_DICT['ferry'].extend([1000, 1200, 1502])
 EXTENDED_TYPE_DICT['funicular'].append(1400)
 EXTENDED_TYPE_DICT['rail'].append(1503)

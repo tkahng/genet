@@ -4,7 +4,6 @@ import networkx as nx
 import logging
 import genet.utils.spatial as spatial
 import genet.utils.graph_operations as graph_operations
-import genet.schedule_elements as schedule_elements
 
 
 def snap_and_route(network_graph, schedule_element, snapping_distance):

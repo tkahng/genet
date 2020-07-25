@@ -1,8 +1,28 @@
+import logging
 import genet.utils.routing as routing
 
 
 def find_routes_for_schedule(network, snapping_distance):
-    pass
+    # modes sharing infrastructure, used for modal subgraphs for routing/snapping
+    routing_mode_map = {
+        'drive': {'bus', 'car'},
+        'rail': {'rail', 'tram', 'subway', 'funicular'},
+        'ferry': {'ferry'},
+        'cable': {'gondola', 'cable car'}
+    }
+    schedule_modes = network.schedule.unique_modes()
+    for mode_group_name, network_modes in routing_mode_map.items():
+        logging.info(f'Routing for subgraph: {mode_group_name}')
+        if schedule_modes & network_modes:
+            # extract modal subgraph
+            modal_subgraph = network.modal_subgraph(network_modes)
+            if modal_subgraph.edges():
+                # todo better identification of services based on modes
+                for service_id, service in network.schedule.services.items():
+                    if service.unique_modes() & network_modes:
+                        find_routes_for_service(modal_subgraph, service, snapping_distance)
+            else:
+                logging.warning(f'Modal subgraph for {mode_group_name} is empty.')
 
 
 def find_routes_for_service(network_graph, service, snapping_distance):

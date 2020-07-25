@@ -6,7 +6,7 @@ from tests.test_modify_schedule import network
 
 
 def test_showing_unique_network_schedule_modes(network):
-    assert network.schedule_modes() == {'bus'}
+    assert network.schedule_modes() == {'rail', 'bus'}
 
 
 def test_build_graph_for_maximum_stable_set_problem_with_non_trivial_closest_node_selection_pool(mocker, network):
