@@ -3,6 +3,7 @@ import s2sphere as s2
 import networkx as nx
 import numpy as np
 import statistics
+
 APPROX_EARTH_RADIUS = 6371008.8
 S2_LEVELS_FOR_SPATIAL_INDEXING = [0, 6, 8, 12, 18, 24, 30]
 
@@ -65,48 +66,40 @@ def change_proj(x, y, crs_transformer):
     return crs_transformer.transform(x, y)
 
 
-def find_common_cell(edge):
-    u, v, w = edge
-    _u = s2.CellId(u)
-    _v = s2.CellId(v)
-    while _u != _v and not _u.is_face():
-        _u = _u.parent()
-        _v = _v.parent()
-    if _u.is_face():
-        # if u is a face then v will be a face too, only need to check u
-        return 0
-    return _u
+def find_closest_nodes(graph, s2_id, distance):
+    """
+    finds nodes within `distance` in meters from s2_cell_id. Nodes are assumed to have s2_id attributes
+    :param graph:
+    :return: list of node ids
+    """
+    neighbourhood_of_node = create_subsetting_area(CellIds=[s2_id],
+                                                   angle=(distance / APPROX_EARTH_RADIUS))
+    return [id for id, s2_id in graph.nodes(data='s2_id') if
+            neighbourhood_of_node.may_intersect(s2.Cell(s2.CellId(s2_id)))]
 
 
-def find_edges_from_common_cell_to_root(s2_link, link_id):
-    common_cell = find_common_cell(s2_link)
+def find_edges_from_cell_to_root(node_id, cell_id):
     edges_to_add = []
-    if common_cell != 0:
-        lvl = common_cell.level()
-        _lvls = [s2_lvl for s2_lvl in S2_LEVELS_FOR_SPATIAL_INDEXING if lvl >= s2_lvl]
-        common_cell = common_cell.parent(_lvls[-1])
-        edges_to_add.append((common_cell.id(), link_id))
-        if _lvls:
-            for i in range(len(_lvls) - 1):
-                edges_to_add.append((common_cell.parent(_lvls[i]).id(), common_cell.parent(_lvls[i + 1]).id()))
-        # add the connection to the super cell
-        edges_to_add.append((0, common_cell.parent(_lvls[0]).id()))
-    else:
-        edges_to_add.append((0, link_id))
+    cell = s2.CellId(cell_id)
+    edges_to_add.append((cell_id, node_id))
+    for i in range(len(S2_LEVELS_FOR_SPATIAL_INDEXING) - 1):
+        edges_to_add.append((cell.parent(S2_LEVELS_FOR_SPATIAL_INDEXING[i]).id(),
+                             cell.parent(S2_LEVELS_FOR_SPATIAL_INDEXING[i + 1]).id()))
+    # add the connection to the super cell
+    edges_to_add.append((0, cell.parent(S2_LEVELS_FOR_SPATIAL_INDEXING[0]).id()))
     return edges_to_add
 
 
-def index_links(graph_links):
+def index_nodes(graph_nodes):
     edges_to_add = []
     nodes_to_add = {}
     # index edges
-    for link_id, link_attrib in graph_links:
-        s2_link = (link_attrib['s2_from'], link_attrib['s2_to'], link_attrib['length'])
-        s2_indexing_edges = find_edges_from_common_cell_to_root(s2_link, link_id)
+    for node_id, node_attrib in graph_nodes:
+        s2_indexing_edges = find_edges_from_cell_to_root(node_id, node_attrib['s2_id'])
         edges_to_add.extend(s2_indexing_edges)
         for from_id_e, to_id_e in s2_indexing_edges:
-            nodes_to_add = add_or_update_indexing_edges_attr_dict(from_id_e, link_attrib, nodes_to_add)
-            nodes_to_add = add_or_update_indexing_edges_attr_dict(to_id_e, link_attrib, nodes_to_add)
+            nodes_to_add = add_or_update_indexing_edges_attr_dict(from_id_e, node_attrib, nodes_to_add)
+            nodes_to_add = add_or_update_indexing_edges_attr_dict(to_id_e, node_attrib, nodes_to_add)
     return edges_to_add, nodes_to_add
 
 
@@ -137,6 +130,7 @@ def create_subsetting_area(CellIds, angle=0, buffer_multiplier=None):
      less than 1, the subsetting area has to at least cover the points passed to generate the area)
     :return: s2.Cap
     """
+
     def sum_pts(pts):
         p = None
         for p_n in pts:
@@ -178,46 +172,46 @@ def create_subsetting_area(CellIds, angle=0, buffer_multiplier=None):
 
 class SpatialTree(nx.DiGraph):
     """
-    Class which represents a nx.MultiDiGraph as a spatial tree
+    Class which represents a nx.MultiDiGraph nodes as a spatial tree
     hierarchy based on s2 cell levels
     """
 
-    def __init__(self, links=None):
+    def __init__(self, nodes=None):
         super().__init__()
-        if links is not None:
-            self.add_links(links)
+        if nodes is not None:
+            self.add_nodes(nodes)
 
-    def add_links(self, links):
+    def add_nodes(self, nodes):
         """
         Indexes each link and adds to the graph
-        :param links: [('link_id', {'attribs': 'cool_link_bro'}), ...]
+        :param nodes: [('nodes', {'s2_id': 12345, 'attribs': 'cool_node_bro'}), ...]
         :return:
         """
 
-        edges_to_add, nodes_to_add = index_links(links)
+        edges_to_add, nodes_to_add = index_nodes(nodes)
 
         for node, data in nodes_to_add.items():
             self.add_node(node, **data)
         self.add_edges_from(list(set(edges_to_add)))
 
     def leaves(self):
-        return [x for x in self.nodes() if (self.out_degree(x) == 0)]
+        return [x for x in self.nodes() if self.is_graph_node(x)]
 
-    def is_link(self, node):
+    def is_graph_node(self, node):
         return self.out_degree(node) == 0
 
     def roots(self):
-        return [x for x in self.nodes() if self.in_degree(x) == 0]
+        return [0]
 
-    def find_closest_links(self, s2_cell, distance_radius):
+    def find_closest_nodes(self, s2_cell, distance_radius):
         angle = distance_radius / APPROX_EARTH_RADIUS
 
-        closest_links_to_cell = []
+        closest_nodes_to_cell = []
 
         def check_children(parent):
             for parent, kid in self.edges(parent):
-                if self.is_link(kid):
-                    closest_links_to_cell.append(kid)
+                if self.is_graph_node(kid):
+                    closest_nodes_to_cell.append(kid)
                 elif neighbourhood_of_g_node.may_intersect(s2.Cell(s2.CellId(kid))):
                     check_children(kid)
 
@@ -225,4 +219,4 @@ class SpatialTree(nx.DiGraph):
         for root in self.roots():
             check_children(root)
 
-        return closest_links_to_cell
+        return closest_nodes_to_cell

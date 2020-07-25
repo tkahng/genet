@@ -240,10 +240,13 @@ class Route:
 
     def build_graph(self):
         route_graph = nx.DiGraph(name='Route graph', crs={'init': self.find_epsg()})
-        route_nodes = [(stop.id, {'x': stop.x, 'y': stop.y, 'lat': stop.lat, 'lon': stop.lon}) for stop in self.stops]
+        route_nodes = [(stop.id, {'x': stop.x, 'y': stop.y,
+                                  'lat': stop.lat, 'lon': stop.lon,
+                                  's2_id': stop.s2_id}) for stop in self.stops]
         route_graph.add_nodes_from(route_nodes)
         stop_edges = [(from_stop.id, to_stop.id) for from_stop, to_stop in zip(self.stops[:-1], self.stops[1:])]
         route_graph.add_edges_from(stop_edges)
+        route_graph.mode = self.mode
         return route_graph
 
     def is_strongly_connected(self):

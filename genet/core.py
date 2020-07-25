@@ -12,6 +12,7 @@ import genet.inputs_handler.osm_reader as osm_reader
 import genet.outputs_handler.matsim_xml_writer as matsim_xml_writer
 import genet.outputs_handler.geojson as geojson
 import genet.modify.change_log as change_log
+import genet.modify.schedule as mod_schedule
 import genet.utils.spatial as spatial
 import genet.utils.persistence as persistence
 import genet.utils.graph_operations as graph_operations
@@ -672,6 +673,9 @@ class Network:
         multi_idx = self.link_id_mapping[link_id]['multi_edge_idx']
         return dict(self.graph[u][v][multi_idx])
 
+    def schedule_modes(self):
+        return self.schedule.unique_modes()
+
     def services(self):
         """
         Iterator returning services
@@ -707,6 +711,13 @@ class Network:
             if _route.route:
                 routes.append(_route.route)
         return routes
+
+    def route_schedule(self, snapping_distance):
+        """
+        Finds shortest paths for Routes in the network's schedule.
+        :return: None. Updates route attribute of Route object(s) and adds/updates linkRefId attribute of Stop objects
+        """
+        mod_schedule.find_routes_for_schedule(self, snapping_distance)
 
     def node_id_exists(self, node_id):
         if node_id in [i for i, attribs in self.nodes()]:
@@ -1075,6 +1086,14 @@ class Schedule:
                 stop.reproject(new_epsg, old_to_new_transformer)
         self.initiate_crs_transformer(new_epsg)
 
+    def unique_modes(self):
+        """
+        Returns list of unique modes in the schedule
+        :return:
+        """
+        # TODO
+        return list()
+
     def service_ids(self):
         return list(self.services.keys())
 
@@ -1114,7 +1133,7 @@ class Schedule:
                     self.stops_mapping[item] = [key]
 
     def build_graph(self):
-        schedule_graph = nx.DiGraph(name='Service graph', crs={'init': self.epsg})
+        schedule_graph = nx.DiGraph(name='Schedule graph', crs={'init': self.epsg})
         for service_id, service in self.services.items():
             schedule_graph = nx.compose(service.build_graph(), schedule_graph)
         return schedule_graph
