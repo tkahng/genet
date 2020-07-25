@@ -249,6 +249,11 @@ class Network:
         :param silent: whether to mute stdout logging messages, useful for big batches
         :return:
         """
+        if self.has_node(node):
+            new_node_id = self.generate_index_for_node(silent=silent)
+            logging.warning('This node_id=`{}` already exists. Generated a new unique_index: `{}`'.format(
+                node, new_node_id))
+            node = new_node_id
         if x_y:
             x, y = x_y
             if self.epsg != 'epsg:4326':

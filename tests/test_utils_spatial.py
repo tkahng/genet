@@ -55,6 +55,19 @@ def test_delegates_distance_between_int_points_query_to_s2(mocker):
     s2sphere.LatLng.get_distance.assert_called_once()
 
 
+def test_finding_closest_nodes():
+    n =  Network('epsg:4326')
+    n.add_node(0, x_y=(51.5221, -0.1331))
+    n.add_node(1, x_y=(51.5222, -0.1332))
+    n.add_node(2, x_y=(51.5223, -0.1333))
+    n.add_node(3, x_y=(51.5224, -0.1334))
+    n.add_node(4, x_y=(51.5225, -0.1335))
+    closest_nodes = spatial.find_closest_nodes(n.graph,
+                                               s2_id=5221390706231820589,
+                                               distance=20)
+    assert closest_nodes == [1, 2, 3]
+
+
 def test_finding_edges_from_cell_to_root():
     cell_id = 5205973754090340691
     spatial_tree_edges = spatial.find_edges_from_cell_to_root(node_id='1', cell_id=cell_id)
