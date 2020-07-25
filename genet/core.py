@@ -1091,8 +1091,7 @@ class Schedule:
         Returns list of unique modes in the schedule
         :return:
         """
-        # TODO
-        return list()
+        return self.build_graph().mode
 
     def service_ids(self):
         return list(self.services.keys())
@@ -1134,8 +1133,12 @@ class Schedule:
 
     def build_graph(self):
         schedule_graph = nx.DiGraph(name='Schedule graph', crs={'init': self.epsg})
+        modes = set()
         for service_id, service in self.services.items():
-            schedule_graph = nx.compose(service.build_graph(), schedule_graph)
+            service_graph = service.build_graph()
+            schedule_graph = nx.compose(service_graph, schedule_graph)
+            modes |= service_graph.mode
+        schedule_graph.mode = modes
         return schedule_graph
 
     def initiate_crs_transformer(self, epsg):

@@ -246,7 +246,7 @@ class Route:
         route_graph.add_nodes_from(route_nodes)
         stop_edges = [(from_stop.id, to_stop.id) for from_stop, to_stop in zip(self.stops[:-1], self.stops[1:])]
         route_graph.add_edges_from(stop_edges)
-        route_graph.mode = self.mode
+        route_graph.mode = {self.mode}
         return route_graph
 
     def is_strongly_connected(self):
@@ -415,8 +415,12 @@ class Service:
 
     def build_graph(self):
         service_graph = nx.DiGraph(name='Service graph', crs={'init': self.find_epsg()})
+        modes = set()
         for route in self.routes:
-            service_graph = nx.compose(route.build_graph(), service_graph)
+            r_graph = route.build_graph()
+            service_graph = nx.compose(r_graph, service_graph)
+            modes |= r_graph.mode
+        service_graph.mode = modes
         return service_graph
 
     def is_strongly_connected(self):

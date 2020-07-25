@@ -1,4 +1,4 @@
-from pyomo.environ import *
+from pyomo.environ import *  # noqa: F403
 import itertools
 import networkx as nx
 import logging
@@ -28,11 +28,15 @@ def snap_and_route(network_graph, schedule_element, snapping_distance):
         network_route = [
             graph_operations.find_shortest_path_link(dict(network_graph[node_u][node_v]), modes=schedule_g.mode) for
             node_u, node_v in zip(nodes[:-1], nodes[1:])]
-        schedule_g[stop_u][stop_v]['network_route'] = network_route
         if 'linkRefId' not in schedule_g.nodes[stop_u]:
             schedule_g.nodes[stop_u]['linkRefId'] = network_route[0]
+        elif network_route[0] != schedule_g.nodes[stop_u]['linkRefId']:
+            network_route = [schedule_g.nodes[stop_u]['linkRefId']] + network_route
         if 'linkRefId' not in schedule_g.nodes[stop_v]:
             schedule_g.nodes[stop_v]['linkRefId'] = network_route[-1]
+        elif network_route[-1] != schedule_g.nodes[stop_v]['linkRefId']:
+            network_route.append(schedule_g.nodes[stop_v]['linkRefId'])
+        schedule_g[stop_u][stop_v]['network_route'] = network_route
     return schedule_g
 
 
@@ -76,7 +80,7 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
                 except nx.NetworkXNoPath:
                     problem_g.add_edge(u_node, v_node)
 
-    # TODO check there are closest nodes left for each stop
+    # check there are closest nodes left for each stop
     for u, v in schedule_g.edges():
         node_degrees = [problem_g.out_degree(c_node) + problem_g.in_degree(c_node) for c_node in
                         schedule_g.nodes[u]['closest_nodes']]
@@ -85,7 +89,7 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
         total_nodes = len(schedule_g.nodes[u]['closest_nodes']) + len(schedule_g.nodes[v]['closest_nodes'])
         if all([node_degree >= total_nodes - 1 for node_degree in node_degrees]):
             logging.warning(
-                f'Two stops: {u} and {v} are conmletely connected, suggesting that one or more stops has found no '
+                f'Two stops: {u} and {v} are conmpletely connected, suggesting that one or more stops has found no '
                 f'viable network nodes within the specified threshold')
             return None, None
     return problem_g, schedule_g
@@ -96,7 +100,7 @@ def set_up_and_solve_model(g):
     # Model
     # --------------------------------------------------------
 
-    model = ConcreteModel()
+    model = ConcreteModel()  # noqa: F405
 
     # --------------------------------------------------------
     # Sets/Params
@@ -109,27 +113,27 @@ def set_up_and_solve_model(g):
     vertices = g.nodes
     edges = g.edges
 
-    model.vertices = Set(initialize=vertices)
+    model.vertices = Set(initialize=vertices)  # noqa: F405
 
     def spatial_proximity_coefficient_init(model, i):
         attribs = g.nodes[i]
         # todo normalise and invert
         return 1 / (attribs['total_path_lengths'] / attribs['total_paths'])
 
-    model.c = Param(model.vertices, initialize=spatial_proximity_coefficient_init)
+    model.c = Param(model.vertices, initialize=spatial_proximity_coefficient_init)  # noqa: F405
 
     # --------------------------------------------------------
     # Variables
     # --------------------------------------------------------
 
-    model.x = Var(vertices, within=Binary)
+    model.x = Var(vertices, within=Binary)  # noqa: F405
 
     # --------------------------------------------------------
     # Constraints
     # --------------------------------------------------------
 
     #
-    model.edge_adjacency = ConstraintList()
+    model.edge_adjacency = ConstraintList()  # noqa: F405
     for u, v in edges:
         model.edge_adjacency.add(model.x[u] + model.x[v] <= 1)
 
@@ -140,10 +144,11 @@ def set_up_and_solve_model(g):
     def total_nodes_rule(model):
         return sum(model.c[i] * model.x[i] for i in model.vertices)
 
-    model.total_nodes = Objective(rule=total_nodes_rule, sense=maximize)
+    model.total_nodes = Objective(rule=total_nodes_rule, sense=maximize)  # noqa: F405
 
-    solver = SolverFactory('glpk')
+    solver = SolverFactory('glpk')  # noqa: F405
     solver.solve(model)
 
-    selected_nodes = [str(v).strip('x[]') for v in model.component_data_objects(Var) if float(v.value) == 1.0]
+    selected_nodes = [str(v).strip('x[]') for v in model.component_data_objects(Var) if  # noqa: F405
+                      float(v.value) == 1.0]
     return {g.nodes[closest_node]['stop_id']: {'closest_node': closest_node} for closest_node in selected_nodes}
