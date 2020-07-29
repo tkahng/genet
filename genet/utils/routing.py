@@ -93,6 +93,9 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
                 f'Two stops: {u} and {v} are conmpletely connected, suggesting that one or more stops has found no '
                 f'viable network nodes within the specified threshold')
             return None, None
+
+    problem_g.total_stops = schedule_g.number_of_nodes()
+
     return problem_g, schedule_g
 
 
@@ -120,7 +123,6 @@ def set_up_and_solve_model(g):
         attribs = g.nodes[i]
         # todo normalise and invert
         return 1 / (attribs['total_path_lengths'] / attribs['total_paths'])
-
     model.c = Param(model.vertices, initialize=spatial_proximity_coefficient_init)  # noqa: F405
 
     # --------------------------------------------------------
@@ -144,7 +146,6 @@ def set_up_and_solve_model(g):
 
     def total_nodes_rule(model):
         return sum(model.c[i] * model.x[i] for i in model.vertices)
-
     model.total_nodes = Objective(rule=total_nodes_rule, sense=maximize)  # noqa: F405
 
     solver = SolverFactory('glpk')  # noqa: F405

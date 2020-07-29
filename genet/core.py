@@ -1002,7 +1002,8 @@ class Network:
         connected_subgraphs_to_extract = modal_subgraph.subgraph(connected_components_nodes).copy().edges.data('id')
         diff_links = set([e[2] for e in modal_subgraph.edges.data('id')]) - set(
             [e[2] for e in connected_subgraphs_to_extract])
-        logging.info('Cleaning for resulted in mode: {} being deleted from {} edges'.format(mode, len(diff_links)))
+        logging.info(f'Extracting largest connected components resulted in mode: {mode} being deleted from '
+                     f'{len(diff_links)} edges')
         self.apply_function_to_links(function=remove_mode, location='modes', silent=True)
 
     def read_matsim_network(self, path):

@@ -35,7 +35,7 @@ networkx==2.4
 nose==1.3.7
 numpy==1.18.4
 osmnx==0.15.0
-osmread==0.2
+-e git+https://github.com/dezhin/osmread.git@d8d3fe5edd15fdab9526ea7a100ee6c796315663#egg=osmread
 packaging==20.4
 pandas==1.0.3
 parso==0.7.0
