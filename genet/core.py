@@ -958,7 +958,7 @@ class Network:
             osm_file_path, config, num_processes)
         for node_id, attribs in nodes.items():
             x, y = spatial.change_proj(attribs['x'], attribs['y'], input_to_output_transformer)
-            self.add_node(str(node_id), x_y=(x,y), silent=True)
+            self.add_node(str(node_id), x_y=(x, y), silent=True)
 
         for edge, attribs in edges:
             u, v = str(edge[0]), str(edge[1])
