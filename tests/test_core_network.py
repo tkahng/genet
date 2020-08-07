@@ -202,9 +202,9 @@ def test_adding_networks_with_clashing_multiindices():
     n_left.add_link('1', '1', '2', 0, attribs={'modes': ['walk']})
 
     n_right = Network('epsg:27700')
-    n_left.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
-    n_left.add_node('2', x_y=(528835.203274008, 182006.27331298392))
-    n_left.add_link('1', '1', '2', 0, attribs={'modes': ['walk', 'bike']})
+    n_right.add_node('1', x_y=(528704.1425925883, 182068.78193707118))
+    n_right.add_node('2', x_y=(528835.203274008, 182006.27331298392))
+    n_right.add_link('1', '1', '2', 0, attribs={'modes': ['walk', 'bike']})
 
     n_left.add(n_right)
     assert len(list(n_left.nodes())) == 2

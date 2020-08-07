@@ -64,7 +64,7 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
             # TODO failure conditions when no closest nodes
             logging.warning(f'One of the stops: {node_id} has found no network nodes within the specified threshold')
             return None, None
-        closest_nodes = [f'{node}_{node_id}' for node in closest_nodes]
+        closest_nodes = [f'{node}-{node_id}' for node in closest_nodes]
         problem_g.add_nodes_from(closest_nodes, total_path_lengths=0, total_paths=0, stop_id=node_id)
         problem_g.add_edges_from(itertools.combinations(closest_nodes, 2))
         schedule_g.nodes[node_id]['closest_nodes'] = closest_nodes
@@ -73,8 +73,8 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
     for u, v in schedule_g.edges():
         for u_node in schedule_g.nodes[u]['closest_nodes']:
             for v_node in schedule_g.nodes[v]['closest_nodes']:
-                u_cl_node = u_node.split('_')[0]
-                v_cl_node = v_node.split('_')[0]
+                u_cl_node = u_node.split('-')[0]
+                v_cl_node = v_node.split('-')[0]
                 try:
                     path_len = nx.dijkstra_path_length(network_graph, u_cl_node, v_cl_node, weight='length')
                     problem_g.nodes[u_node]['total_path_lengths'] += path_len
@@ -156,5 +156,5 @@ def set_up_and_solve_model(g):
 
     selected_nodes = [str(v).strip('x[]') for v in model.component_data_objects(Var) if  # noqa: F405
                       float(v.value) == 1.0]
-    return {g.nodes[closest_node]['stop_id']: {'closest_node': closest_node.split('_')[0]}
+    return {g.nodes[closest_node]['stop_id']: {'closest_node': closest_node.split('-')[0]}
             for closest_node in selected_nodes}
