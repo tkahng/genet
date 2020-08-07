@@ -1,6 +1,7 @@
 from genet.core import Network, Schedule
 from genet.utils import graph_operations
 from anytree import Node, RenderTree
+from networkx import DiGraph
 from tests.fixtures import assert_semantically_equal
 import logging
 
@@ -255,6 +256,18 @@ def test_extract_graph_nodes_with_callable_condition():
     )
 
     assert nodes == [1]
+
+
+def test_extract_graph_nodes_with_nx_graph():
+    n = DiGraph()
+    n.add_nodes_from(['1', '2', '3'], attrib=1)
+
+    nodes = graph_operations.extract_nodes_on_node_attributes(
+        n,
+        conditions={'attrib': 1}
+    )
+
+    assert nodes == ['1', '2', '3']
 
 
 def test_get_attribute_schema_with_nested_dictionaries():

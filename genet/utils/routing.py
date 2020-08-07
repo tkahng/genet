@@ -59,6 +59,7 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
         message = message + f' id: {schedule_element.id}'
     logging.info(message)
     for node_id, s2_id in schedule_g.nodes(data='s2_id'):
+        # TODO parallelise closest node finding (all schedule stops at once)
         closest_nodes = spatial.find_closest_nodes(network_graph, s2_id, snapping_distance)
         if not closest_nodes:
             # TODO failure conditions when no closest nodes
@@ -71,31 +72,34 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
 
     logging.info('Computing shortest paths')
     for u, v in schedule_g.edges():
-        for u_node in schedule_g.nodes[u]['closest_nodes']:
-            for v_node in schedule_g.nodes[v]['closest_nodes']:
-                u_cl_node = u_node.split('-')[0]
-                v_cl_node = v_node.split('-')[0]
+        for problem_g_u_closest_node in schedule_g.nodes[u]['closest_nodes']:
+            for problem_g_v_closest_node in schedule_g.nodes[v]['closest_nodes']:
+                u_closest_node = problem_g_u_closest_node.split('-')[0]
+                v_closest_node = problem_g_v_closest_node.split('-')[0]
                 try:
-                    path_len = nx.dijkstra_path_length(network_graph, u_cl_node, v_cl_node, weight='length')
-                    problem_g.nodes[u_node]['total_path_lengths'] += path_len
-                    problem_g.nodes[u_node]['total_paths'] += 1
-                    problem_g.nodes[v_node]['total_path_lengths'] += path_len
-                    problem_g.nodes[v_node]['total_paths'] += 1
+                    path_len = nx.dijkstra_path_length(network_graph, u_closest_node, v_closest_node, weight='length')
+                    problem_g.nodes[problem_g_u_closest_node]['total_path_lengths'] += path_len
+                    problem_g.nodes[problem_g_u_closest_node]['total_paths'] += 1
+                    problem_g.nodes[problem_g_v_closest_node]['total_path_lengths'] += path_len
+                    problem_g.nodes[problem_g_v_closest_node]['total_paths'] += 1
                 except nx.NetworkXNoPath:
-                    problem_g.add_edge(u_node, v_node)
+                    problem_g.add_edge(problem_g_u_closest_node, problem_g_v_closest_node)
 
     # check there are closest nodes left for each stop
     for u, v in schedule_g.edges():
         node_degrees = [problem_g.out_degree(c_node) + problem_g.in_degree(c_node) for c_node in
-                        schedule_g.nodes[u]['closest_nodes']]
+            schedule_g.nodes[u]['closest_nodes']]
         node_degrees = node_degrees + [problem_g.out_degree(c_node) + problem_g.in_degree(c_node) for c_node in
-                                       schedule_g.nodes[v]['closest_nodes']]
+            schedule_g.nodes[v]['closest_nodes']]
         total_nodes = len(schedule_g.nodes[u]['closest_nodes']) + len(schedule_g.nodes[v]['closest_nodes'])
         if all([node_degree >= total_nodes - 1 for node_degree in node_degrees]):
             logging.warning(
-                f'Two stops: {u} and {v} are conmpletely connected, suggesting that one or more stops has found no '
+                f'Two stops: {u} and {v} are completely connected, suggesting that one or more stops has found no '
                 f'viable network nodes within the specified threshold')
             return None, None
+
+    nodes_without_paths = graph_operations.extract_nodes_on_node_attributes(problem_g, conditions={'total_paths': 0})
+    problem_g.remove_nodes_from(nodes_without_paths)
 
     problem_g.total_stops = schedule_g.number_of_nodes()
 
@@ -151,8 +155,18 @@ def set_up_and_solve_model(g):
         return sum(model.c[i] * model.x[i] for i in model.vertices)
     model.total_nodes = Objective(rule=total_nodes_rule, sense=maximize)  # noqa: F405
 
+    logging.info('Passing problem to solver')
+
+    # --------------------------------------------------------
+    # Solver
+    # --------------------------------------------------------
+
     solver = SolverFactory('glpk')  # noqa: F405
     solver.solve(model)
+
+    # --------------------------------------------------------
+    # Solution parse
+    # --------------------------------------------------------
 
     selected_nodes = [str(v).strip('x[]') for v in model.component_data_objects(Var) if  # noqa: F405
                       float(v.value) == 1.0]

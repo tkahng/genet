@@ -62,23 +62,15 @@ def test_build_graph_for_maximum_stable_set_problem_with_no_path_between_isolate
                                           'closest_nodes': ['node_1-stop_1', 'node_2-stop_1']}})
     assert_semantically_equal(list(schedule_g.edges()), [('stop_2', 'stop_3'), ('stop_1', 'stop_2')])
     assert_semantically_equal(dict(problem_g.nodes(data=True)),
-                              {'isolated_node-stop_2': {'total_path_lengths': 0, 'total_paths': 0, 'stop_id': 'stop_2'},
-                               'node_5-stop_2': {'total_path_lengths': 10, 'total_paths': 4, 'stop_id': 'stop_2'},
+                              {'node_5-stop_2': {'total_path_lengths': 10, 'total_paths': 4, 'stop_id': 'stop_2'},
                                'node_6-stop_2': {'total_path_lengths': 10, 'total_paths': 4, 'stop_id': 'stop_2'},
                                'node_7-stop_3': {'total_path_lengths': 3, 'total_paths': 2, 'stop_id': 'stop_3'},
                                'node_8-stop_3': {'total_path_lengths': 5, 'total_paths': 2, 'stop_id': 'stop_3'},
                                'node_1-stop_1': {'total_path_lengths': 5, 'total_paths': 2, 'stop_id': 'stop_1'},
                                'node_2-stop_1': {'total_path_lengths': 7, 'total_paths': 2, 'stop_id': 'stop_1'}})
     assert_semantically_equal(list(problem_g.edges()),
-                              [('isolated_node-stop_2', 'node_5-stop_2'), ('isolated_node-stop_2', 'node_6-stop_2'),
-                               ('isolated_node-stop_2', 'node_7-stop_3'), ('isolated_node-stop_2', 'node_8-stop_3'),
-                               ('node_5-stop_2', 'node_6-stop_2'), ('node_7-stop_3', 'node_8-stop_3'),
-                               ('node_1-stop_1', 'node_2-stop_1'), ('node_1-stop_1', 'isolated_node-stop_2'),
-                               ('node_2-stop_1', 'isolated_node-stop_2')]
+                              [('node_5-stop_2', 'node_6-stop_2'), ('node_7-stop_3', 'node_8-stop_3'),
+                               ('node_1-stop_1', 'node_2-stop_1')]
                               )
 
 
-def test_routing_single_route(mocker, network):
-    mocker.patch.object(spatial, 'find_closest_nodes',
-                        side_effect=[['node_1', 'node_2'], ['node_5', 'node_6']])
-    pass

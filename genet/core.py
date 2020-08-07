@@ -1006,6 +1006,8 @@ class Network:
                      f'{len(diff_links)} edges')
         self.apply_function_to_links(function=remove_mode, location='modes', silent=True)
 
+        # TODO remove links without modes
+
     def read_matsim_network(self, path):
         self.graph, self.link_id_mapping, duplicated_nodes, duplicated_links = \
             matsim_reader.read_network(path, self.transformer_to_lat_lon)

@@ -1,6 +1,7 @@
 from typing import Union, Dict, Callable, Iterable
 from anytree import Node, RenderTree
 import pandas as pd
+import networkx as nx
 import logging
 from itertools import count, filterfalse
 
@@ -108,7 +109,7 @@ def extract_nodes_on_node_attributes(network, conditions: Union[list, dict], how
     """
     Extracts graph nodes based on values of attributes saved on the nodes. Fails silently,
     assumes not all nodes have all of the attributes.
-    :param network: genet.core.Network object
+    :param network: genet.core.Network object or a networkx graph
     :param conditions: {'attribute_key': 'target_value'} or nested
     {'attribute_key': {'another_key': {'yet_another_key': 'target_value'}}}, where 'target_value' could be
 
@@ -129,7 +130,11 @@ def extract_nodes_on_node_attributes(network, conditions: Union[list, dict], how
     :return: list of node ids of the input network
     """
     filter = Filter(conditions, how)
-    return [node_id for node_id, node_attribs in network.nodes() if filter.satisfies_conditions(node_attribs)]
+    if isinstance(network, (nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph)):
+        return [node_id for node_id, node_attribs in network.nodes(data=True) if
+            filter.satisfies_conditions(node_attribs)]
+    else:
+        return [node_id for node_id, node_attribs in network.nodes() if filter.satisfies_conditions(node_attribs)]
 
 
 def get_attribute_schema(iterator, data=False):
