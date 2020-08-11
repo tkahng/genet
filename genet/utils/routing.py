@@ -6,7 +6,7 @@ import genet.utils.spatial as spatial
 import genet.utils.graph_operations as graph_operations
 
 
-def snap_and_route(network_graph, schedule_element, snapping_distance):
+def snap_and_route(network_graph, schedule_element, snapping_distance, solver):
     """
     :param network_graph: modal subgraph of genet network
     :param schedule_element: route, service or schedule (not recommended)
@@ -17,7 +17,7 @@ def snap_and_route(network_graph, schedule_element, snapping_distance):
                                                                        snapping_distance)
     if problem_g is None:
         return None
-    solution = set_up_and_solve_model(problem_g)
+    solution = set_up_and_solve_model(problem_g, solver)
     nx.set_node_attributes(schedule_g, solution)
     # generate route(s)
     for stop_u, stop_v in schedule_g.edges():
@@ -102,11 +102,15 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
     problem_g.remove_nodes_from(nodes_without_paths)
 
     problem_g.total_stops = schedule_g.number_of_nodes()
+    if 'id' in schedule_element.__dict__:
+        problem_g.id = schedule_element.id
+    else:
+        problem_g.id = 'schedule'
 
     return problem_g, schedule_g
 
 
-def set_up_and_solve_model(g):
+def set_up_and_solve_model(g, solver='glpk'):
     # --------------------------------------------------------
     # Model
     # --------------------------------------------------------
@@ -142,7 +146,6 @@ def set_up_and_solve_model(g):
     # Constraints
     # --------------------------------------------------------
 
-    #
     model.edge_adjacency = ConstraintList()  # noqa: F405
     for u, v in edges:
         model.edge_adjacency.add(model.x[u] + model.x[v] <= 1)
@@ -155,14 +158,13 @@ def set_up_and_solve_model(g):
         return sum(model.c[i] * model.x[i] for i in model.vertices)
     model.total_nodes = Objective(rule=total_nodes_rule, sense=maximize)  # noqa: F405
 
-    logging.info('Passing problem to solver')
-
     # --------------------------------------------------------
     # Solver
     # --------------------------------------------------------
 
-    solver = SolverFactory('glpk')  # noqa: F405
-    solver.solve(model)
+    logging.info('Passing problem to solver')
+    _solver = SolverFactory(solver)  # noqa: F405
+    _solver.solve(model)
 
     # --------------------------------------------------------
     # Solution parse

@@ -743,12 +743,12 @@ class Network:
                 routes.append(_route.route)
         return routes
 
-    def route_schedule(self, snapping_distance):
+    def route_schedule(self, snapping_distance, solver='glpk'):
         """
         Finds shortest paths for Routes in the network's schedule.
         :return: None. Updates route attribute of Route object(s) and adds/updates linkRefId attribute of Stop objects
         """
-        mod_schedule.find_routes_for_schedule(self, snapping_distance)
+        mod_schedule.find_routes_for_schedule(self, snapping_distance, solver)
 
     def node_id_exists(self, node_id):
         if node_id in [i for i, attribs in self.nodes()]:
