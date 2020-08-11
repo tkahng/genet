@@ -31,12 +31,12 @@ def snap_and_route(network_graph, schedule_element, snapping_distance, solver):
             node_u, node_v in zip(nodes[:-1], nodes[1:])]
         if 'linkRefId' not in schedule_g.nodes[stop_u]:
             schedule_g.nodes[stop_u]['linkRefId'] = network_route[0]
-        elif network_route[0] != schedule_g.nodes[stop_u]['linkRefId']:
-            network_route = [schedule_g.nodes[stop_u]['linkRefId']] + network_route
+        if network_route[0] == schedule_g.nodes[stop_u]['linkRefId']:
+            network_route = network_route[1:]
         if 'linkRefId' not in schedule_g.nodes[stop_v]:
             schedule_g.nodes[stop_v]['linkRefId'] = network_route[-1]
-        elif network_route[-1] != schedule_g.nodes[stop_v]['linkRefId']:
-            network_route.append(schedule_g.nodes[stop_v]['linkRefId'])
+        if network_route[-1] == schedule_g.nodes[stop_v]['linkRefId']:
+            network_route = network_route[:-1]
         schedule_g[stop_u][stop_v]['network_route'] = network_route
     return schedule_g
 

@@ -30,12 +30,17 @@ def find_routes_for_service(network_graph, service, snapping_distance, solver):
     if service_g is not None:
         for route in service.routes:
             network_route = []
-            for stop_u, stop_v in zip(route.stops[:-1], route.stops[1:]):
-                network_route = network_route + service_g[stop_u.id][stop_v.id]['network_route']
-                # todo what happens if different services share stops? linkref ids could get overwritten (mintransfer
-                # times)
+            for i in range(len(route.stops) - 1):
+                stop_u = route.stops[i]
+                stop_v = route.stops[i+1]
                 stop_u.linkRefId = service_g.nodes[stop_u.id]['linkRefId']
                 stop_v.linkRefId = service_g.nodes[stop_v.id]['linkRefId']
+                if i == 0:
+                    network_route.append(stop_u.linkRefId)
+                network_route = network_route + service_g[stop_u.id][stop_v.id]['network_route']
+                network_route.append(stop_v.linkRefId)
+                # todo what happens if different services share stops? linkref ids could get overwritten (mintransfer
+                # times)
             route.route = network_route
     else:
         logging.warning(f'Routing failed for Service: {service.id}')
@@ -45,8 +50,17 @@ def find_route_for_route(network_graph, route, snapping_distance, solver):
     route_g = routing.snap_and_route(network_graph, route, snapping_distance, solver)
     if route_g is not None:
         network_route = []
-        for stop_u, stop_v in route_g.edges():
-            network_route = network_route + route_g[stop_u][stop_v]['network_route']
+        for i in range(len(route.stops) - 1):
+            stop_u = route.stops[i]
+            stop_v = route.stops[i + 1]
+            stop_u.linkRefId = route_g.nodes[stop_u.id]['linkRefId']
+            stop_v.linkRefId = route_g.nodes[stop_v.id]['linkRefId']
+            if i == 0:
+                network_route.append(stop_u.linkRefId)
+            network_route = network_route + route_g[stop_u.id][stop_v.id]['network_route']
+            network_route.append(stop_v.linkRefId)
+            # todo what happens if different services share stops? linkref ids could get overwritten (mintransfer
+            # times)
         route.route = network_route
         for stop in route.stops:
             stop.linkRefId = route_g.nodes[stop.id]['linkRefId']

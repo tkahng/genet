@@ -106,14 +106,14 @@ def assert_correct_routing_for_service_1(network):
 def test_find_routes_for_schedule(mocker, network):
     mocker.patch.object(spatial, 'find_closest_nodes',
                         side_effect=[['node_5', 'node_6'], ['node_7', 'node_8'], ['node_1', 'node_2']])
-    mod_schedule.find_routes_for_schedule(network, 30)
+    mod_schedule.find_routes_for_schedule(network, 30, solver='glpk')
     assert_correct_routing_for_service_1(network)
 
 
 def test_find_routes_for_service(mocker, network):
     mocker.patch.object(spatial, 'find_closest_nodes',
                         side_effect=[['node_5', 'node_6'], ['node_7', 'node_8'], ['node_1', 'node_2']])
-    mod_schedule.find_routes_for_service(network.graph, network.schedule['service_1'], 30)
+    mod_schedule.find_routes_for_service(network.graph, network.schedule['service_1'], 30, solver='glpk')
     assert_correct_routing_for_service_1(network)
 
 
@@ -123,7 +123,7 @@ def test_find_route_for_route(mocker, network):
 
     r = network.schedule['service_1'].routes[0]
 
-    mod_schedule.find_route_for_route(network.graph, r, 30)
+    mod_schedule.find_route_for_route(network.graph, r, 30, solver='glpk')
 
     assert r.route
     assert r.route == ['link_5', 'link_6']
@@ -173,7 +173,7 @@ def test_find_route_when_service_has_two_separate_edges_but_one_stop_has_common_
                                    departure_offsets=['00:00:00', '00:03:00']
                                    )
                          ])])
-    mod_schedule.find_routes_for_schedule(network, 30)
+    mod_schedule.find_routes_for_schedule(network, 30, solver='glpk')
 
     assert network.schedule.is_valid_schedule()
 
