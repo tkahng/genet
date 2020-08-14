@@ -271,13 +271,16 @@ class Route(ScheduleElement):
     def __str__(self):
         return self.info()
 
+    def __len__(self):
+        return len(self.ordered_stops)
+
     def _build_graph(self, stops: List[Stop]):
         route_graph = nx.DiGraph(name='Route graph')
         route_nodes = [(stop.id, stop.__dict__) for stop in stops]
         route_graph.add_nodes_from(route_nodes, routes=[self.id])
         stop_edges = [(from_stop.id, to_stop.id) for from_stop, to_stop in zip(stops[:-1], stops[1:])]
         route_graph.add_edges_from(stop_edges)
-        route_graph.mode = {self.mode}
+        route_graph.graph['mode'] = {self.mode}
         return route_graph
 
     def reindex(self, new_id):
@@ -479,8 +482,8 @@ class Service(ScheduleElement):
             g = route.graph()
             routes_attribs = persistence.merge_dicts_with_lists(dict(g.nodes(data='routes')), routes_attribs)
             service_graph = nx.compose(g, service_graph)
-            modes |= g.mode
-        service_graph.mode = modes
+            modes |= g.graph['mode']
+        service_graph.graph['mode'] = modes
 
         nx.set_node_attributes(service_graph, values=routes_attribs, name='routes')
         nx.set_node_attributes(service_graph, values=[self.id], name='services')
@@ -534,7 +537,7 @@ class Service(ScheduleElement):
         Returns list of unique modes
         :return:
         """
-        return self.graph().mode
+        return self.graph().graph['mode']
 
     def is_strongly_connected(self):
         if nx.number_strongly_connected_components(self.graph()) == 1:
@@ -634,8 +637,8 @@ class Schedule(ScheduleElement):
             routes_attribs = persistence.merge_dicts_with_lists(dict(g.nodes(data='routes')), routes_attribs)
             services_attribs = persistence.merge_dicts_with_lists(dict(g.nodes(data='services')), services_attribs)
             schedule_graph = nx.compose(g, schedule_graph)
-            modes |= g.mode
-        schedule_graph.mode = modes
+            modes |= g.graph['mode']
+        schedule_graph.graph['mode'] = modes
         nx.set_node_attributes(schedule_graph, values=routes_attribs, name='routes')
         nx.set_node_attributes(schedule_graph, values=services_attribs, name='services')
 
@@ -705,7 +708,7 @@ class Schedule(ScheduleElement):
         Returns list of unique modes in the schedule
         :return:
         """
-        return self.graph().mode
+        return self.graph().graph['mode']
 
     def service_ids(self):
         return list(self.services.keys())

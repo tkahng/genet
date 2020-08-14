@@ -28,11 +28,11 @@ def find_routes_for_schedule(network, snapping_distance, solver):
 def find_routes_for_service(network_graph, service, snapping_distance, solver):
     service_g = routing.snap_and_route(network_graph, service, snapping_distance, solver)
     if service_g is not None:
-        for route in service.routes:
+        for route in service.routes.values():
             network_route = []
-            for i in range(len(route.stops) - 1):
-                stop_u = route.stops[i]
-                stop_v = route.stops[i+1]
+            for i in range(len(route) - 1):
+                stop_u = route.stop(route.ordered_stops[i])
+                stop_v = route.stop(route.ordered_stops[i + 1])
                 stop_u.linkRefId = service_g.nodes[stop_u.id]['linkRefId']
                 stop_v.linkRefId = service_g.nodes[stop_v.id]['linkRefId']
                 if i == 0:
@@ -50,9 +50,9 @@ def find_route_for_route(network_graph, route, snapping_distance, solver):
     route_g = routing.snap_and_route(network_graph, route, snapping_distance, solver)
     if route_g is not None:
         network_route = []
-        for i in range(len(route.stops) - 1):
-            stop_u = route.stops[i]
-            stop_v = route.stops[i + 1]
+        for i in range(len(route) - 1):
+            stop_u = route.stop(route.ordered_stops[i])
+            stop_v = route.stop(route.ordered_stops[i + 1])
             stop_u.linkRefId = route_g.nodes[stop_u.id]['linkRefId']
             stop_v.linkRefId = route_g.nodes[stop_v.id]['linkRefId']
             if i == 0:
@@ -62,7 +62,7 @@ def find_route_for_route(network_graph, route, snapping_distance, solver):
             # todo what happens if different services share stops? linkref ids could get overwritten (mintransfer
             # times)
         route.route = network_route
-        for stop in route.stops:
+        for stop in route.stops():
             stop.linkRefId = route_g.nodes[stop.id]['linkRefId']
     else:
         logging.warning(f'Routing failed for Route: {route.id}')

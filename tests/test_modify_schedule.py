@@ -1,8 +1,8 @@
 import pytest
 from genet.modify import schedule as mod_schedule
 from genet.utils import spatial
-from genet.core import Network, Schedule
-from genet.schedule_elements import Service, Route, Stop
+from genet.core import Network
+from genet.schedule_elements import Schedule, Service, Route, Stop
 from tests.fixtures import assert_semantically_equal
 
 
@@ -78,34 +78,32 @@ def network():
 
 
 def assert_correct_routing_for_service_1(network):
-    n = 0
-    assert network.schedule['service_1'].routes[n].stops[0].has_linkRefId
-    assert network.schedule['service_1'].routes[n].stops[0].linkRefId == 'link_5'
-    assert network.schedule['service_1'].routes[n].stops[1].has_linkRefId
-    assert network.schedule['service_1'].routes[n].route
-    if network.schedule['service_1'].routes[n].stops[1].linkRefId == 'link_6':
-        assert network.schedule['service_1'].routes[n].route == ['link_5', 'link_6']
-    elif network.schedule['service_1'].routes[n].stops[1].linkRefId == 'link_7':
-        assert network.schedule['service_1'].routes[n].route == ['link_5', 'link_6', 'link_7']
+    assert network.schedule.stop('stop_1').has_linkRefId
+    assert network.schedule.stop('stop_1').linkRefId == 'link_5'
+    assert network.schedule.stop('stop_2').has_linkRefId
+    assert network.schedule.route('service_1_route_1').route
+    if network.schedule.stop('stop_2').linkRefId == 'link_6':
+        assert network.schedule.route('service_1_route_1').route == ['link_5', 'link_6']
+    elif network.schedule.stop('stop_2').linkRefId == 'link_7':
+        assert network.schedule.route('service_1_route_1').route == ['link_5', 'link_6', 'link_7']
     else:
         raise AssertionError
 
-    n = 1
-    assert network.schedule['service_1'].routes[n].stops[1].has_linkRefId
-    assert network.schedule['service_1'].routes[n].stops[1].linkRefId == 'link_8'
-    assert network.schedule['service_1'].routes[n].stops[0].has_linkRefId
-    assert network.schedule['service_1'].routes[n].route
-    if network.schedule['service_1'].routes[n].stops[0].linkRefId == 'link_6':
-        assert network.schedule['service_1'].routes[n].route == ['link_6', 'link_7', 'link_8']
-    elif network.schedule['service_1'].routes[n].stops[0].linkRefId == 'link_7':
-        assert network.schedule['service_1'].routes[n].route == ['link_7', 'link_8']
+    assert network.schedule.stop('stop_3').has_linkRefId
+    assert network.schedule.stop('stop_3').linkRefId == 'link_8'
+    assert network.schedule.stop('stop_2').has_linkRefId
+    assert network.schedule.route('service_1_route_2').route
+    if network.schedule.stop('stop_2').linkRefId == 'link_6':
+        assert network.schedule.route('service_1_route_2').route == ['link_6', 'link_7', 'link_8']
+    elif network.schedule.stop('stop_2').linkRefId == 'link_7':
+        assert network.schedule.route('service_1_route_2').route == ['link_7', 'link_8']
     else:
         raise AssertionError
 
 
 def test_find_routes_for_schedule(mocker, network):
     mocker.patch.object(spatial, 'find_closest_nodes',
-                        side_effect=[['node_5', 'node_6'], ['node_7', 'node_8'], ['node_1', 'node_2']])
+                        side_effect=[['node_5', 'node_6'], ['node_7', 'node_8'], ['node_1', 'node_2'], []])
     mod_schedule.find_routes_for_schedule(network, 30, solver='glpk')
     assert_correct_routing_for_service_1(network)
 
@@ -119,18 +117,18 @@ def test_find_routes_for_service(mocker, network):
 
 def test_find_route_for_route(mocker, network):
     mocker.patch.object(spatial, 'find_closest_nodes',
-                        side_effect=[['node_1', 'node_2'], ['node_5', 'node_6']])
+                        side_effect=[['node_5', 'node_6'], ['node_1', 'node_2']])
 
-    r = network.schedule['service_1'].routes[0]
+    r = network.schedule.route('service_1_route_1')
 
     mod_schedule.find_route_for_route(network.graph, r, 30, solver='glpk')
 
     assert r.route
     assert r.route == ['link_5', 'link_6']
-    assert r.stops[0].has_linkRefId
-    assert r.stops[0].linkRefId == 'link_5'
-    assert r.stops[1].has_linkRefId
-    assert r.stops[1].linkRefId == 'link_6'
+    assert r.stop('stop_1').has_linkRefId
+    assert r.stop('stop_1').linkRefId == 'link_5'
+    assert r.stop('stop_2').has_linkRefId
+    assert r.stop('stop_2').linkRefId == 'link_6'
 
 
 def test_find_route_when_one_stop_doesnt_have_nodes_to_snap_to():

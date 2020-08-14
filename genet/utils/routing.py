@@ -27,7 +27,7 @@ def snap_and_route(network_graph, schedule_element, snapping_distance, solver):
             schedule_g.nodes[stop_v]['closest_node']
         )
         network_route = [
-            graph_operations.find_shortest_path_link(dict(network_graph[node_u][node_v]), modes=schedule_g.mode) for
+            graph_operations.find_shortest_path_link(dict(network_graph[node_u][node_v]), modes=schedule_g.graph['mode']) for
             node_u, node_v in zip(nodes[:-1], nodes[1:])]
         if 'linkRefId' not in schedule_g.nodes[stop_u]:
             schedule_g.nodes[stop_u]['linkRefId'] = network_route[0]
@@ -53,7 +53,7 @@ def build_graph_for_maximum_stable_set_problem(network_graph, schedule_element, 
     :return:
     """
     problem_g = nx.DiGraph()
-    schedule_g = schedule_element.build_graph()
+    schedule_g = schedule_element.graph()
     message = f'Building Problem Graph for {schedule_element.__class__.__name__}'
     if 'id' in schedule_element.__dict__:
         message = message + f' id: {schedule_element.id}'

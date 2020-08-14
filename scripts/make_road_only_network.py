@@ -48,9 +48,10 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.WARNING)
 
     n = gn.Network(projection)
-    logging.info('Reading in network at {}'.format(osm))
-    n.read_osm(osm, config, num_processes=processes)
     # TODO uncomment when this functionality makes it to master
-    # for mode in ['walk', 'car', 'bike']:
-    #     n.retain_n_connected_subgraphs(n=connected_components, mode=mode)
+    logging.info(f'Reading in network at {osm}')
+    n.read_osm(osm, config, num_processes=processes)
+    logging.info('Extracting connected components for walk, bike and car')
+    for mode in ['walk', 'car', 'bike']:
+        n.retain_n_connected_subgraphs(n=connected_components, mode=mode)
     n.write_to_matsim(output_dir)
