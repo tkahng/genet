@@ -15,6 +15,7 @@ import genet.modify.schedule as mod_schedule
 import genet.utils.spatial as spatial
 import genet.utils.persistence as persistence
 import genet.utils.graph_operations as graph_operations
+import genet.utils.dict_support as dict_support
 import genet.validate.network_validation as network_validation
 import genet.utils.plot as plot
 import genet.schedule_elements as schedule_elements
@@ -451,7 +452,7 @@ class Network:
 
         # check if change is to nested part of node data
         if any(isinstance(v, dict) for v in new_attributes.values()):
-            new_attributes = persistence.set_nested_value(old_attributes, new_attributes)
+            new_attributes = dict_support.set_nested_value(old_attributes, new_attributes)
         else:
             new_attributes = {**old_attributes, **new_attributes}
 
@@ -513,7 +514,7 @@ class Network:
 
                 # check if change is to nested part of node data
                 if any(isinstance(v, dict) for v in new_attributes.values()):
-                    new_attribs = persistence.set_nested_value(old_attributes, new_attributes)
+                    new_attribs = dict_support.set_nested_value(old_attributes, new_attributes)
                 else:
                     new_attribs = {**old_attributes, **new_attributes}
 
@@ -558,7 +559,7 @@ class Network:
 
         # check if change is to nested part of node data
         if any(isinstance(v, dict) for v in new_attributes.values()):
-            new_attributes = persistence.set_nested_value(old_attributes, new_attributes)
+            new_attributes = dict_support.set_nested_value(old_attributes, new_attributes)
         else:
             new_attributes = {**old_attributes, **new_attributes}
 
