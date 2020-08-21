@@ -101,21 +101,23 @@ MATSIM_JOSM_DEFAULTS = {
 
 
 MODE_DICT = {
-    "Tram,Streetcar,Light rail".lower(): 'Tram',
-    "Subway,Metro".lower(): 'Underground Service',
-    "Subway".lower(): 'Underground Service',
-    "Metro".lower(): 'Underground Service',
-    "Rail".lower(): 'Rail',
-    "Bus".lower(): 'Bus',
-    "Ferry".lower(): 'Ferry',
-    "Cable car".lower(): 'Cable car',
-    "Gondola,Suspended cable car".lower(): 'Gondola',
-    "Funicular".lower(): 'Funicular'
+    "Tram,Streetcar,Light rail".lower(): 'tram',
+    "Tram".lower(): 'tram',
+    "Subway,Metro".lower(): 'subway',
+    "Subway".lower(): 'subway',
+    "Metro".lower(): 'subway',
+    "Rail".lower(): 'rail',
+    "Bus".lower(): 'bus',
+    "Ferry".lower(): 'ferry',
+    "Cable car".lower(): 'gondola',
+    "Gondola,Suspended cable car".lower(): 'gondola',
+    "Gondola".lower(): 'gondola',
+    "Funicular".lower(): 'funicular'
 }
 
 
 VEHICLE_TYPES = {
-    'Bus': {
+    'bus': {
         'capacity': {
             'seats': {'persons': '70'},
             'standingRoom': {'persons': '0'}
@@ -127,7 +129,7 @@ VEHICLE_TYPES = {
         'doorOperation': {'mode': 'serial'},
         'passengerCarEquivalents': {'pce': '2.8'}
     },
-    'Rail': {
+    'rail': {
         'capacity': {
             'seats': {'persons': '400'},
             'standingRoom': {'persons': '0'}
@@ -139,7 +141,7 @@ VEHICLE_TYPES = {
         'doorOperation': {'mode': 'serial'},
         'passengerCarEquivalents': {'pce': '27.1'}
     },
-    'Underground Service': {
+    'subway': {
         'capacity': {
             'seats': {'persons': '300'},
             'standingRoom': {'persons': '0'}
@@ -151,7 +153,7 @@ VEHICLE_TYPES = {
         'doorOperation': {'mode': 'serial'},
         'passengerCarEquivalents': {'pce': '4.4'}
     },
-    'Ferry': {
+    'ferry': {
         'capacity': {
             'seats': {'persons': '250'},
             'standingRoom': {'persons': '0'}
@@ -163,7 +165,7 @@ VEHICLE_TYPES = {
         'doorOperation': {'mode': 'serial'},
         'passengerCarEquivalents': {'pce': '7.1'}
     },
-    'Tram': {
+    'tram': {
         'capacity': {
             'seats': {'persons': '180'},
             'standingRoom': {'persons': '0'}
@@ -174,5 +176,17 @@ VEHICLE_TYPES = {
         'egressTime': {'secondsPerPerson': '0.25'},
         'doorOperation': {'mode': 'serial'},
         'passengerCarEquivalents': {'pce': '5.2'}
+    },
+    'gondola': {
+        'capacity': {
+            'seats': {'persons': '10'},
+            'standingRoom': {'persons': '0'}
+        },
+        'length': {'meter': '4.0'},
+        'width': {'meter': '4.0'},
+        'accessTime': {'secondsPerPerson': '0.25'},
+        'egressTime': {'secondsPerPerson': '0.25'},
+        'doorOperation': {'mode': 'serial'},
+        'passengerCarEquivalents': {'pce': '2'}
     }
 }
